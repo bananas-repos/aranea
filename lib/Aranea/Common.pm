@@ -1,0 +1,38 @@
+package Aranea::Common;
+use 5.20.0;
+use strict;
+use warnings;
+use utf8;
+use Term::ANSIColor qw(:constants);
+
+use DateTime;
+use Exporter qw(import);
+
+
+our @EXPORT_OK = qw(sayLog sayYellow sayGreen sayRed);
+
+sub sayLog {
+	my ($string) = @_;
+	my $dt = DateTime->now;
+	say "[".$dt->datetime."] DEBUG: ".$string;
+}
+
+sub sayYellow {
+	my ($string) = @_;
+	my $dt = DateTime->now;
+	say CLEAR,YELLOW, "[".$dt->datetime."] ".$string, RESET;
+}
+
+sub sayGreen {
+	my ($string) = @_;
+	my $dt = DateTime->now;
+	say CLEAR,GREEN, "[".$dt->datetime."] ".$string, RESET;
+}
+
+sub sayRed {
+	my ($string) = @_;
+	my $dt = DateTime->now;
+	say BOLD, RED, "[".$dt->datetime."] ".$string, RESET;
+}
+
+1;
