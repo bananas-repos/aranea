@@ -1,10 +1,20 @@
 #!/usr/bin/perl -w
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the COMMON DEVELOPMENT AND DISTRIBUTION LICENSE
+#
+# You should have received a copy of the
+# COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0
+# along with this program.  If not, see http://www.sun.com/cddl/cddl.html
+#
+# 2022 https://://www.bananas-playground.net
+
 use 5.20.0;
 use strict;
 use warnings;
 use utf8;
-use Term::ANSIColor qw(:constants);
 use Data::Dumper;
+use Term::ANSIColor qw(:constants);
 
 use lib './lib';
 use Aranea::Common qw(sayLog sayYellow sayGreen sayRed);
