@@ -52,12 +52,14 @@ sayLog($queryStr) if $DEBUG;
 $query = $dbh->prepare($queryStr);
 $query->execute();
 my @invalidUrls = ();
+my @toBeDeletedFromFetchAgain = ();
 while(my @row = $query->fetchrow_array) {
 	my $link = $row[1];
 	my $id = $row[0];
 	if(!is_uri($link)) {
 		sayYellow "Ignore URL it is invalid: $link";
 		push(@invalidUrls, $id);
+		push(@toBeDeletedFromFetchAgain, $link);
 		next;
 	}
 
@@ -65,11 +67,12 @@ while(my @row = $query->fetchrow_array) {
 	if(!defined($url->scheme) || index($url->scheme,"http") == -1) {
 		sayYellow "Ignore URL because of scheme: $link";
 		push(@invalidUrls, $id);
+		push(@toBeDeletedFromFetchAgain, $link);
 		next;
 	}
 }
 
-sayYellow "Invalid URLs: ".scalar @invalidUrls;
+sayYellow "Invalid unique_domain: ".scalar @invalidUrls;
 $queryStr = "DELETE FROM unique_domain WHERE `id` = ?";
 sayLog($queryStr) if $DEBUG;
 $query = $dbh->prepare($queryStr);
@@ -78,16 +81,15 @@ foreach my $invalidId (@invalidUrls) {
 	$query->finish();
 	sayLog "Removed $invalidId from unique_domain" if $DEBUG;
 }
-sayGreen "Invalid URLs removed: ".scalar @invalidUrls;
+sayGreen "Invalid unique_domain removed: ".scalar @invalidUrls;
 
 
 # remove urls from fetch since we have enough already
-my @toBeDeletedFromFetchAgain = ();
 $queryStr = "SELECT count(baseurl) AS amount, baseurl 
 				FROM `url_to_fetch` 
 				WHERE last_fetched <> 0 
 				GROUP BY baseurl 
-				HAVING amount > 40";
+				HAVING amount > ".$config->get("CLEANUP_URLS_AMOUNT_ABOVE");
 sayLog($queryStr) if $DEBUG;
 $query = $dbh->prepare($queryStr);
 $query->execute();

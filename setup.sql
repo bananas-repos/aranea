@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.1.1
+-- version 5.0.4deb2
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: Jan 11, 2022 at 05:33 PM
--- Server version: 8.0.25
--- PHP Version: 7.4.21
+-- Host: localhost:3306
+-- Generation Time: Jan 16, 2022 at 10:40 AM
+-- Server version: 10.5.12-MariaDB-0+deb11u1
+-- PHP Version: 7.4.25
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -20,8 +20,6 @@ SET time_zone = "+00:00";
 --
 -- Database: `aranea`
 --
-CREATE DATABASE IF NOT EXISTS `aranea` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;
-USE `aranea`;
 
 -- --------------------------------------------------------
 
@@ -31,9 +29,9 @@ USE `aranea`;
 
 DROP TABLE IF EXISTS `unique_domain`;
 CREATE TABLE `unique_domain` (
-  `id` int NOT NULL,
-  `url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-  `created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+  `id` int(11) NOT NULL,
+  `url` varchar(255) COLLATE utf8mb4_bin NOT NULL,
+  `created` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 -- --------------------------------------------------------
@@ -44,12 +42,12 @@ CREATE TABLE `unique_domain` (
 
 DROP TABLE IF EXISTS `url_to_fetch`;
 CREATE TABLE `url_to_fetch` (
-  `id` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-  `url` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-  `baseurl` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+  `id` char(32) COLLATE utf8mb4_bin NOT NULL,
+  `url` text COLLATE utf8mb4_bin NOT NULL,
+  `baseurl` varchar(255) COLLATE utf8mb4_bin NOT NULL,
   `created` datetime NOT NULL,
   `last_fetched` datetime DEFAULT NULL,
-  `fetch_failed` tinyint(1) NOT NULL DEFAULT '0'
+  `fetch_failed` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 -- --------------------------------------------------------
@@ -60,8 +58,8 @@ CREATE TABLE `url_to_fetch` (
 
 DROP TABLE IF EXISTS `url_to_ignore`;
 CREATE TABLE `url_to_ignore` (
-  `id` int NOT NULL,
-  `searchfor` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+  `id` int(11) NOT NULL,
+  `searchfor` varchar(255) COLLATE utf8mb4_bin NOT NULL,
   `created` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
@@ -102,7 +100,15 @@ INSERT INTO `url_to_ignore` (`id`, `searchfor`, `created`) VALUES
 (33, 'goo.', '2022-01-06 10:02:11'),
 (34, 'cdn.', '2022-01-06 10:02:59'),
 (35, 'flickr.', '2022-01-06 10:05:46'),
-(36, '.mp3', '2022-01-07 13:11:49');
+(36, '.mp3', '2022-01-07 13:11:49'),
+(40, '.aac', '2022-01-08 13:33:22'),
+(41, '.opus', '2022-01-08 13:33:22'),
+(42, 'awin1.', '2022-01-08 13:39:14'),
+(43, 'sms:', '2022-01-09 10:32:46'),
+(44, 'fb-messanger;', '2022-01-09 10:32:46'),
+(45, 'hhttps:', '2022-01-09 12:20:43'),
+(46, 'httpss:', '2022-01-09 13:12:34'),
+(47, 'soundcloud.', '2022-01-16 10:37:04');
 
 --
 -- Indexes for dumped tables
@@ -120,7 +126,9 @@ ALTER TABLE `unique_domain`
 --
 ALTER TABLE `url_to_fetch`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `baseurl` (`baseurl`);
+  ADD KEY `baseurl` (`baseurl`),
+  ADD KEY `last_fetched` (`last_fetched`),
+  ADD KEY `fetch_failed` (`fetch_failed`);
 
 --
 -- Indexes for table `url_to_ignore`
@@ -137,13 +145,13 @@ ALTER TABLE `url_to_ignore`
 -- AUTO_INCREMENT for table `unique_domain`
 --
 ALTER TABLE `unique_domain`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `url_to_ignore`
 --
 ALTER TABLE `url_to_ignore`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
