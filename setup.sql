@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jan 16, 2022 at 10:40 AM
--- Server version: 10.5.12-MariaDB-0+deb11u1
--- PHP Version: 7.4.25
+-- Generation Time: May 08, 2022 at 09:44 AM
+-- Server version: 10.5.15-MariaDB-0+deb11u1
+-- PHP Version: 7.4.28
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -20,6 +20,8 @@ SET time_zone = "+00:00";
 --
 -- Database: `aranea`
 --
+CREATE DATABASE IF NOT EXISTS `aranea` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;
+USE `aranea`;
 
 -- --------------------------------------------------------
 
@@ -27,7 +29,6 @@ SET time_zone = "+00:00";
 -- Table structure for table `unique_domain`
 --
 
-DROP TABLE IF EXISTS `unique_domain`;
 CREATE TABLE `unique_domain` (
   `id` int(11) NOT NULL,
   `url` varchar(255) COLLATE utf8mb4_bin NOT NULL,
@@ -40,7 +41,6 @@ CREATE TABLE `unique_domain` (
 -- Table structure for table `url_to_fetch`
 --
 
-DROP TABLE IF EXISTS `url_to_fetch`;
 CREATE TABLE `url_to_fetch` (
   `id` char(32) COLLATE utf8mb4_bin NOT NULL,
   `url` text COLLATE utf8mb4_bin NOT NULL,
@@ -56,11 +56,10 @@ CREATE TABLE `url_to_fetch` (
 -- Table structure for table `url_to_ignore`
 --
 
-DROP TABLE IF EXISTS `url_to_ignore`;
 CREATE TABLE `url_to_ignore` (
   `id` int(11) NOT NULL,
   `searchfor` varchar(255) COLLATE utf8mb4_bin NOT NULL,
-  `created` datetime NOT NULL
+  `created` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 --
@@ -105,10 +104,16 @@ INSERT INTO `url_to_ignore` (`id`, `searchfor`, `created`) VALUES
 (41, '.opus', '2022-01-08 13:33:22'),
 (42, 'awin1.', '2022-01-08 13:39:14'),
 (43, 'sms:', '2022-01-09 10:32:46'),
-(44, 'fb-messanger;', '2022-01-09 10:32:46'),
 (45, 'hhttps:', '2022-01-09 12:20:43'),
 (46, 'httpss:', '2022-01-09 13:12:34'),
-(47, 'soundcloud.', '2022-01-16 10:37:04');
+(47, 'soundcloud.', '2022-01-16 10:37:04'),
+(48, 'fb-messenger:', '2022-01-16 14:42:18'),
+(49, 'smartadserver.', '2022-01-16 16:48:46'),
+(50, 'ispgateway.', '2022-01-16 16:56:11'),
+(51, 'bitcoin:', '2022-01-16 19:48:41'),
+(52, 'webcal:', '2022-05-08 09:39:02'),
+(53, 'source:', '2022-05-08 09:43:19'),
+(54, 'phone', '2022-05-08 09:44:19');
 
 --
 -- Indexes for dumped tables
@@ -151,7 +156,7 @@ ALTER TABLE `unique_domain`
 -- AUTO_INCREMENT for table `url_to_ignore`
 --
 ALTER TABLE `url_to_ignore`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
