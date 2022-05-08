@@ -47,7 +47,9 @@ my %urlsToFetch;
 my $query = $dbh->prepare("SELECT `id`, `url` 
 							FROM `url_to_fetch` 
 							WHERE `last_fetched` < NOW() - INTERVAL 1 WEEK
-								AND `fetch_failed` = 0");
+								OR `last_fetched` IS NULL
+								AND `fetch_failed` = 0
+							LIMIT 5000");
 $query->execute();
 while(my @row = $query->fetchrow_array) {
 	$urlsToFetch{$row[0]} = $row[1];
