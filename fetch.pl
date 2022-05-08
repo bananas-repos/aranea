@@ -7,8 +7,7 @@
 # COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0
 # along with this program.  If not, see http://www.sun.com/cddl/cddl.html
 #
-# 2022 https://://www.bananas-playground.net
-
+# 2022 https://://www.bananas-playground.net/projekt/aranea
 
 use 5.20.0;
 use strict;
@@ -49,7 +48,7 @@ my $query = $dbh->prepare("SELECT `id`, `url`
 							WHERE `last_fetched` < NOW() - INTERVAL 1 WEEK
 								OR `last_fetched` IS NULL
 								AND `fetch_failed` = 0
-							LIMIT 5000");
+							LIMIT ".$config->get("FETCH_URLS_PER_RUN"));
 $query->execute();
 while(my @row = $query->fetchrow_array) {
 	$urlsToFetch{$row[0]} = $row[1];

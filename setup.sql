@@ -113,7 +113,8 @@ INSERT INTO `url_to_ignore` (`id`, `searchfor`, `created`) VALUES
 (51, 'bitcoin:', '2022-01-16 19:48:41'),
 (52, 'webcal:', '2022-05-08 09:39:02'),
 (53, 'source:', '2022-05-08 09:43:19'),
-(54, 'phone', '2022-05-08 09:44:19');
+(54, 'phone:', '2022-05-08 09:44:19'),
+(55, 'threema:', '2022-05-08 09:45:19');
 
 --
 -- Indexes for dumped tables
@@ -156,7 +157,7 @@ ALTER TABLE `unique_domain`
 -- AUTO_INCREMENT for table `url_to_ignore`
 --
 ALTER TABLE `url_to_ignore`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=56;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
