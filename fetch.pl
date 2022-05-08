@@ -82,7 +82,7 @@ while ( my ($id, $url) = each %urlsToFetch ) {
 			push(@urlsFailed, $id);
 			next;
 		}
-		open(my $fh, '>', "storage/$id.result") or die "Could not open file 'storage/$id.result' $!";		
+		open(my $fh, '>', "storage/$id.result") or die "Could not open file 'storage/$id.result' $!";
 		print $fh $res->decoded_content();
 		close($fh);
 		push(@urlsFetched, $id);

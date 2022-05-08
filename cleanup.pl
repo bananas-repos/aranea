@@ -107,7 +107,7 @@ foreach my $baseUrl (@toBeDeletedFromFetchAgain) {
 	$query->finish();
 	sayLog "Removed $baseUrl from url_to_fetch" if $DEBUG;
 }
-sayGreen "Remove baseurls from url_to_fetch: ".scalar @toBeDeletedFromFetchAgain;
+sayGreen "Removed baseurls from url_to_fetch: ".scalar @toBeDeletedFromFetchAgain;
 
 # remove failed fetches
 sayYellow "Remove fetch_failed";
@@ -120,7 +120,7 @@ sayYellow "Remove invalid urls which the is_uri check does let pass";
 $queryStr = "DELETE FROM unique_domain WHERE `url` NOT LIKE '%.%'";
 $query = $dbh->prepare($queryStr);
 $query->execute();
-$queryStr = "SELECT * FROM `url_to_fetch` WHERE `baseurl` LIKE '% %'";
+$queryStr = "DELETE FROM `url_to_fetch` WHERE `baseurl` LIKE '% %'";
 $query = $dbh->prepare($queryStr);
 $query->execute();
 sayYellow "Remove invalid urls done";
