@@ -8,6 +8,7 @@ UA_AGENT="Mozilla/5.0 (X11; Linux x86_64; rv:95.0) Gecko/20100101 Firefox/95.0"
 UA_ACCEPT="text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
 UA_LANG="en-US"
 UA_CACHE="no-cache"
+UA_TIMEOUT=5
 
 FETCH_URLS_PER_RUN=5000
 FETCH_URLS_PER_PACKAGE=30

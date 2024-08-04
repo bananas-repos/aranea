@@ -1,13 +1,19 @@
 #!/usr/bin/perl -w
 
+# 2022 - 2024 https://://www.bananas-playground.net/projekt/aranea
+
 # This program is free software: you can redistribute it and/or modify
-# it under the terms of the COMMON DEVELOPMENT AND DISTRIBUTION LICENSE
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-# You should have received a copy of the
-# COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0
-# along with this program.  If not, see http://www.sun.com/cddl/cddl.html
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-# 2022 https://://www.bananas-playground.net/projekt/aranea
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see http://www.gnu.org/licenses/gpl-3.0.
 
 use 5.20.0;
 use strict;
@@ -32,7 +38,7 @@ die "Could not read config! $ConfigReader::Simple::ERROR\n" unless ref $config;
 ## DB connection
 my %dbAttr = (
 	PrintError=>0,# turn off error reporting via warn()
-    RaiseError=>1 # turn on error reporting via die() 
+    RaiseError=>1 # turn on error reporting via die()
 );
 my $dbDsn = "DBI:mysql:database=".$config->get("DB_NAME").";host=".$config->get("DB_HOST").";port=".$config->get("DB_PORT");
 my $dbh = DBI->connect($dbDsn,$config->get("DB_USER"),$config->get("DB_PASS"), \%dbAttr);
@@ -85,10 +91,10 @@ sayGreen "Invalid unique_domain removed: ".scalar @invalidUrls;
 
 
 # remove urls from fetch since we have enough already
-$queryStr = "SELECT count(baseurl) AS amount, baseurl 
-				FROM `url_to_fetch` 
-				WHERE last_fetched <> 0 
-				GROUP BY baseurl 
+$queryStr = "SELECT count(baseurl) AS amount, baseurl
+				FROM `url_to_fetch`
+				WHERE last_fetched <> 0
+				GROUP BY baseurl
 				HAVING amount > ".$config->get("CLEANUP_URLS_AMOUNT_ABOVE");
 sayLog($queryStr) if $DEBUG;
 $query = $dbh->prepare($queryStr);

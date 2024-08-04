@@ -1,13 +1,19 @@
 #!/usr/bin/perl -w
 
+# 2022 - 2024 https://://www.bananas-playground.net/projekt/aranea
+
 # This program is free software: you can redistribute it and/or modify
-# it under the terms of the COMMON DEVELOPMENT AND DISTRIBUTION LICENSE
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-# You should have received a copy of the
-# COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0
-# along with this program.  If not, see http://www.sun.com/cddl/cddl.html
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-# 2022 https://://www.bananas-playground.net/projekt/aranea
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see http://www.gnu.org/licenses/gpl-3.0.
 
 use 5.20.0;
 use strict;
@@ -34,7 +40,7 @@ die "Could not read config! $ConfigReader::Simple::ERROR\n" unless ref $config;
 ## DB connection
 my %dbAttr = (
 	PrintError=>0,# turn off error reporting via warn()
-    RaiseError=>1 # turn on error reporting via die() 
+    RaiseError=>1 # turn on error reporting via die()
 );
 my $dbDsn = "DBI:mysql:database=".$config->get("DB_NAME").";host=".$config->get("DB_HOST").";port=".$config->get("DB_PORT");
 my $dbh = DBI->connect($dbDsn,$config->get("DB_USER"),$config->get("DB_PASS"), \%dbAttr);
@@ -43,8 +49,8 @@ die "failed to connect to MySQL database:DBI->errstr()" unless($dbh);
 
 ## fetch the urls to fetch from the table
 my %urlsToFetch;
-my $query = $dbh->prepare("SELECT `id`, `url` 
-							FROM `url_to_fetch` 
+my $query = $dbh->prepare("SELECT `id`, `url`
+							FROM `url_to_fetch`
 							WHERE `last_fetched` < NOW() - INTERVAL 1 WEEK
 								OR `last_fetched` IS NULL
 								AND `fetch_failed` = 0
@@ -68,6 +74,7 @@ my $request_headers = [
   'Cache-Control' => $config->get("UA_CACHE")
 ];
 my $ua = LWP::UserAgent->new;
+$ua->timeout($config->get("UA_TIMEOUT"));
 
 ## now loop over them and store the results
 my $counter = 0;
@@ -92,7 +99,7 @@ while ( my ($id, $url) = each %urlsToFetch ) {
 		sayRed "Fetching: $id failed: $res->code ".$res->status_line;
 		push(@urlsFailed, $id);
 	}
-	
+
 	if($counter >= $config->get("FETCH_URLS_PER_PACKAGE")) {
 		updateFetched($dbh, @urlsFetched);
 		updateFailed($dbh, @urlsFailed);
@@ -139,6 +146,5 @@ sub updateFailed {
 		$query->execute();
 	}
 	$query->finish();
-	sayGreen "Update fetch failed done";	
+	sayGreen "Update fetch failed done";
 }
-
