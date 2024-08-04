@@ -104,6 +104,7 @@ while(my @row = $query->fetchrow_array) {
 	push(@toBeDeletedFromFetchAgain, $baseUrl);
 }
 $query->finish();
+
 sayYellow "Remove baseurls from url_to_fetch: ".scalar @toBeDeletedFromFetchAgain;
 $queryStr = "DELETE FROM url_to_fetch WHERE `baseurl` = ?";
 sayLog($queryStr) if $DEBUG;

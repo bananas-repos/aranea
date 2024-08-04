@@ -51,7 +51,7 @@ die "failed to connect to MySQL database:DBI->errstr()" unless($dbh);
 my %urlsToFetch;
 my $query = $dbh->prepare("SELECT `id`, `url`
 							FROM `url_to_fetch`
-							WHERE `last_fetched` < NOW() - INTERVAL 1 WEEK
+							WHERE `last_fetched` < NOW() - INTERVAL 1 MONTH
 								OR `last_fetched` IS NULL
 								AND `fetch_failed` = 0
 							LIMIT ".$config->get("FETCH_URLS_PER_RUN"));
@@ -89,7 +89,7 @@ while ( my ($id, $url) = each %urlsToFetch ) {
 			push(@urlsFailed, $id);
 			next;
 		}
-		open(my $fh, '>', "storage/$id.result") or die "Could not open file 'storage/$id.result' $!";
+		open(my $fh, '>:encoding(UTF-8)', "storage/$id.result") or die "Could not open file 'storage/$id.result' $!";
 		print $fh $res->decoded_content();
 		close($fh);
 		push(@urlsFetched, $id);
