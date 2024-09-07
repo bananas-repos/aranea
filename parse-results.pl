@@ -188,9 +188,9 @@ sub insertIntoDb {
 
 		$counter++;
 
-		if($counter >= 100) {
+		if($counter >= 500) {
 			$counter = 0;
-			sayYellow "Commit counter of 100 reached. Commiting";
+			sayYellow "Commit counter of 500 reached. Commiting";
 			$dbh->commit();
 		}
 
