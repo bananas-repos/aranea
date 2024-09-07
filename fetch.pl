@@ -40,7 +40,8 @@ die "Could not read config! $ConfigReader::Simple::ERROR\n" unless ref $config;
 ## DB connection
 my %dbAttr = (
 	PrintError=>0,# turn off error reporting via warn()
-    RaiseError=>1 # turn on error reporting via die()
+    RaiseError=>1, # turn on error reporting via die()
+	AutoCommit=>0 # manually use transactions
 );
 my $dbDsn = "DBI:mysql:database=".$config->get("DB_NAME").";host=".$config->get("DB_HOST").";port=".$config->get("DB_PORT");
 my $dbh = DBI->connect($dbDsn,$config->get("DB_USER"),$config->get("DB_PASS"), \%dbAttr);
@@ -130,7 +131,7 @@ sub updateFetched {
 		$query->bind_param(1,$idToUpdate);
 		$query->execute();
 	}
-	#$query->finish();
+	$dbh->commit();
 	sayGreen "Update fetch timestamps done";
 }
 
@@ -145,6 +146,6 @@ sub updateFailed {
 		$query->bind_param(1,$idToUpdate);
 		$query->execute();
 	}
-	#$query->finish();
+	$dbh->commit();
 	sayGreen "Update fetch failed done";
 }

@@ -129,9 +129,8 @@ foreach my $resultFile (@results) {
 @links = cleanLinks($dbh, \@links, \@urlStringsToIgnore);
 insertIntoDb($dbh, \@links);
 
-
 $dbh->disconnect();
-say CLEAR,GREEN, "Parse complete", RESET;
+sayGreen "Parse complete";
 
 
 ## cleanup the found links

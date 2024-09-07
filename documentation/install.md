@@ -10,6 +10,6 @@ Use setup.sql to create the `aranea` database and its tables. `mysql --user=user
 
 # Config
 
-Edit `config.txt`  at least to match the database server settings.
+Copy `config.default.txt` to `config.txt` and edit at least to match the database server settings.
 
 Make sure the directory `storage` can be written.

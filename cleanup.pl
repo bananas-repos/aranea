@@ -46,7 +46,7 @@ die "failed to connect to MySQL database:DBI->errstr()" unless($dbh);
 
 
 
-# update the uniqe domains
+# update the unique domains
 my $queryStr = "INSERT IGNORE INTO unique_domain (url) select DISTINCT(baseurl) as url FROM url_to_fetch WHERE fetch_failed = 0";
 sayLog($queryStr) if $DEBUG;
 my $query = $dbh->prepare($queryStr);

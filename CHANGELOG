@@ -1,6 +1,9 @@
 0.2
 + Cleanups
 + License change
++ Some db improvements
++ Default config file added
++ Updated requirements file
 
 0.1
 + initial release
