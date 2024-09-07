@@ -39,9 +39,9 @@ die "Could not read config! $ConfigReader::Simple::ERROR\n" unless ref $config;
 
 ## DB connection
 my %dbAttr = (
-	PrintError=>0,# turn off error reporting via warn()
+    PrintError=>0,# turn off error reporting via warn()
     RaiseError=>1, # turn on error reporting via die()
-	AutoCommit=>0 # manually use transactions
+    AutoCommit=>0 # manually use transactions
 );
 my $dbDsn = "DBI:mysql:database=".$config->get("DB_NAME").";host=".$config->get("DB_HOST").";port=".$config->get("DB_PORT");
 my $dbh = DBI->connect($dbDsn,$config->get("DB_USER"),$config->get("DB_PASS"), \%dbAttr);
@@ -51,16 +51,15 @@ die "failed to connect to MySQL database:DBI->errstr()" unless($dbh);
 ## fetch the urls to fetch from the table
 my %urlsToFetch;
 my $query = $dbh->prepare("SELECT `id`, `url`
-							FROM `url_to_fetch`
-							WHERE `last_fetched` < NOW() - INTERVAL 1 MONTH
-								OR `last_fetched` IS NULL
-								AND `fetch_failed` = 0
-							LIMIT ".$config->get("FETCH_URLS_PER_RUN"));
+                            FROM `url_to_fetch`
+                            WHERE `last_fetched` < NOW() - INTERVAL 1 MONTH
+                                OR `last_fetched` IS NULL
+                                AND `fetch_failed` = 0
+                            LIMIT ".$config->get("FETCH_URLS_PER_RUN"));
 $query->execute();
 while(my @row = $query->fetchrow_array) {
-	$urlsToFetch{$row[0]} = $row[1];
+    $urlsToFetch{$row[0]} = $row[1];
 }
-#$query->finish();
 
 # successful fetches
 my @urlsFetched;
@@ -68,50 +67,56 @@ my @urlsFailed;
 
 # config the user agent for the request
 my $request_headers = [
-  'User-Agent' => $config->get("UA_AGENT"),
-  'Accept' => $config->get("UA_ACCEPT"),
-  'Accept-Language' => $config->get("UA_LANG"),
-  'Accept-Encoding' => HTTP::Message::decodable,
-  'Cache-Control' => $config->get("UA_CACHE")
+    'User-Agent' => $config->get("UA_AGENT"),
+    'Accept' => $config->get("UA_ACCEPT"),
+    'Accept-Language' => $config->get("UA_LANG"),
+    'Accept-Encoding' => HTTP::Message::decodable,
+    'Cache-Control' => $config->get("UA_CACHE")
 ];
-my $ua = LWP::UserAgent->new;
+my $ua = LWP::UserAgent->new();
 $ua->timeout($config->get("UA_TIMEOUT"));
 
 ## now loop over them and store the results
 my $counter = 0;
+my $fetchedData;
 while ( my ($id, $url) = each %urlsToFetch ) {
-	sayYellow "Fetching: $id $url";
+    sayYellow "Fetching: $id $url";
 
-	my $req = HTTP::Request->new(GET => $url, $request_headers);
-	my $res = $ua->request($req);
-	if ($res->is_success) {
-		if(index($res->content_type, "text/html") == -1) {
-			sayYellow "Fetching: $id ignored. Not html";
-			push(@urlsFailed, $id);
-			next;
-		}
-		open(my $fh, '>:encoding(UTF-8)', "storage/$id.result") or die "Could not open file 'storage/$id.result' $!";
-		print $fh $res->decoded_content();
-		close($fh);
-		push(@urlsFetched, $id);
-		sayGreen"Fetching: $id ok";
-	}
-	else {
-		sayRed "Fetching: $id failed: $res->code ".$res->status_line;
-		push(@urlsFailed, $id);
-	}
+    my $req = HTTP::Request->new(GET => $url, $request_headers);
+    my $res = $ua->request($req, \&getCallback);
+    if ($res->is_success) {
+        # callback tells us to stop
+        if($res->header('X-Died')) {
+            next;
+        }
+        if(index($res->content_type, "text/html") == -1) {
+            sayYellow "Fetching: $id ignored. Not html";
+            push(@urlsFailed, $id);
+            next;
+        }
+        open(my $fh, '>:encoding(UTF-8)', "storage/$id.result") or die "Could not open file 'storage/$id.result' $!";
+        print $fh $res->decoded_content();
+        close($fh);
+        push(@urlsFetched, $id);
+        sayGreen"Fetching: $id ok";
+    }
+    else {
+        sayRed "Fetching: $id failed: $res->code ".$res->status_line;
+        push(@urlsFailed, $id);
+    }
 
-	if($counter >= $config->get("FETCH_URLS_PER_PACKAGE")) {
-		updateFetched($dbh, @urlsFetched);
-		updateFailed($dbh, @urlsFailed);
-		sleep(rand(7));
+    if($counter >= $config->get("FETCH_URLS_PER_PACKAGE")) {
+        updateFetched($dbh, @urlsFetched);
+        updateFailed($dbh, @urlsFailed);
+        sleep(rand(7));
 
-		$counter = 0;
-		@urlsFetched = ();
-		@urlsFailed = ();
-	}
+        $counter = 0;
+        @urlsFetched = ();
+        @urlsFailed = ();
+    }
 
-	$counter++;
+    $counter++;
+    $fetchedData = 0;
 }
 updateFetched($dbh, @urlsFetched);
 updateFailed($dbh, @urlsFailed);
@@ -123,29 +128,42 @@ sayGreen "Fetch complete";
 
 ## update last_fetched in the table
 sub updateFetched {
-	my ($dbh, @urls) = @_;
-	sayYellow "Update fetch timestamps: ".scalar @urls;
-	$query = $dbh->prepare("UPDATE `url_to_fetch` SET `last_fetched` = NOW() WHERE `id` = ?");
-	foreach my $idToUpdate (@urls) {
-		sayLog "Update fetch timestamp for: $idToUpdate" if($DEBUG);
-		$query->bind_param(1,$idToUpdate);
-		$query->execute();
-	}
-	$dbh->commit();
-	sayGreen "Update fetch timestamps done";
+    my ($dbh, @urls) = @_;
+    sayYellow "Update fetch timestamps: ".scalar @urls;
+    $query = $dbh->prepare("UPDATE `url_to_fetch` SET `last_fetched` = NOW() WHERE `id` = ?");
+    foreach my $idToUpdate (@urls) {
+        sayLog "Update fetch timestamp for: $idToUpdate" if($DEBUG);
+        $query->bind_param(1,$idToUpdate);
+        $query->execute();
+    }
+    $dbh->commit();
+    sayGreen "Update fetch timestamps done";
 }
 
 ## update fetch_failed in the table
 sub updateFailed {
-	my ($dbh, @urls) = @_;
+    my ($dbh, @urls) = @_;
 
-	sayYellow "Update fetch failed: ".scalar @urls;
-	$query = $dbh->prepare("UPDATE `url_to_fetch` SET `fetch_failed` = 1 WHERE `id` = ?");
-	foreach my $idToUpdate (@urls) {
-		sayLog "Update fetch failed for: $idToUpdate" if($DEBUG);
-		$query->bind_param(1,$idToUpdate);
-		$query->execute();
-	}
-	$dbh->commit();
-	sayGreen "Update fetch failed done";
+    sayYellow "Update fetch failed: ".scalar @urls;
+    $query = $dbh->prepare("UPDATE `url_to_fetch` SET `fetch_failed` = 1 WHERE `id` = ?");
+    foreach my $idToUpdate (@urls) {
+        sayLog "Update fetch failed for: $idToUpdate" if($DEBUG);
+        $query->bind_param(1,$idToUpdate);
+        $query->execute();
+    }
+    $dbh->commit();
+    sayGreen "Update fetch failed done";
+}
+
+## callback for request to check the already downloaded size.
+## Avoid big downloads
+## $fetchedData is set and reset out this sub
+## the die sets x-died header
+sub getCallback {
+    my ( $chunk, $res, $proto ) = @_;
+    $fetchedData .= $chunk;
+    if(length($fetchedData) > $config->get("MAX_BYTES_PER_PAGE")) {
+        sayLog "Download size maximum reached." if($DEBUG);
+        die();
+    }
 }

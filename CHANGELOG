@@ -4,6 +4,7 @@
 + Some db improvements
 + Default config file added
 + Updated requirements file
++ Avoid big downloads with MAX_BYTES_PER_PAGE setting.
 
 0.1
 + initial release

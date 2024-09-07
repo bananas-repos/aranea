@@ -1,4 +1,3 @@
-Avoid download to mutch data. Content check before?
 Set correct timezone. Maybe in config?
 Some sort of matching against spam domain list?
 A web view for the results?
