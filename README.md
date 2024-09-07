@@ -8,21 +8,18 @@ The aim is to gather unique domains to show what is out there.
 ## Fetch
 
 It starts with a given set of URL(s) and parses them for more
-URLs. Stores them and fetches them too.
--> fetch.pl
+URLs. Stores them and fetches them too. `perl fetch.pl`
 
 ## Parse
 
 Each URL result (Stored result from the call) will be parsed
-for other URLs to follow.
--> parse-results.pl
+for other URLs to follow. `perl parse-results.pl`
 
 ## Cleanup
 
 After a run cleanup will gather all the unique Domains into
 a table. Removes URLs from the fetch table which are already
-enough.
--> cleanup.pl
+enough. `perl cleanup.pl`
 
 # Ignores
 
