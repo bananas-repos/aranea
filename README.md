@@ -1,6 +1,6 @@
 # aranea
 
-https://://www.bananas-playground.net/projekt/aranea
+https://www.bananas-playground.net/projekt/aranea
 
 A small web crawler named aranea (Latin for spider).
 The aim is to gather unique domains to show what is out there.
