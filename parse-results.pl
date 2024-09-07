@@ -190,6 +190,7 @@ sub insertIntoDb {
 
 		if($counter >= 100) {
 			$counter = 0;
+			sayYellow "Commit counter of 100 reached. Commiting";
 			$dbh->commit();
 		}
 
@@ -201,5 +202,6 @@ sub insertIntoDb {
 
 		#sayLog "Inserted: $link" if($DEBUG);
 	}
+	sayYellow "Final commit";
 	$dbh->commit();
 }
