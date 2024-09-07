@@ -41,7 +41,8 @@ die "Could not read config! $ConfigReader::Simple::ERROR\n" unless ref $config;
 ## DB connection
 my %dbAttr = (
 	PrintError=>0,# turn off error reporting via warn()
-    RaiseError=>1 # turn on error reporting via die()
+    RaiseError=>1, # turn on error reporting via die()
+	AutoCommit=>0 # manually use transactions
 );
 my $dbDsn = "DBI:mysql:database=".$config->get("DB_NAME").";host=".$config->get("DB_HOST").";port=".$config->get("DB_PORT");
 my $dbh = DBI->connect($dbDsn,$config->get("DB_USER"),$config->get("DB_PASS"), \%dbAttr);
@@ -68,7 +69,6 @@ $query->execute(@queryIds);
 while(my @row = $query->fetchrow_array) {
 	$baseUrls{$row[0]} = $row[1];
 }
-#$query->finish();
 
 
 # get the string to ignore
@@ -80,7 +80,6 @@ $query->execute();
 while(my @row = $query->fetchrow) {
 	push(@urlStringsToIgnore, $row[0])
 }
-#$query->finish();
 
 
 ## prepare linkExtor
@@ -166,6 +165,7 @@ sub insertIntoDb {
 	sayLog $queryStr if $DEBUG;
 	$query = $dbh->prepare($queryStr);
 	my $md5 = Digest::MD5->new;
+	my $counter = 0;
 	foreach my $link (@links) {
 
 		sayLog $link if ($DEBUG);
@@ -186,6 +186,13 @@ sub insertIntoDb {
 		$query->execute($digest, $link, $url->scheme."://".$url->host);
 		$md5->reset;
 
+		$counter++;
+
+		if($counter >= 100) {
+			$counter = 0;
+			$dbh->commit();
+		}
+
 		#sayLog $digest if ($DEBUG);
 		#sayLog $url->scheme if ($DEBUG);
 		#sayLog $url->host if ($DEBUG);
@@ -194,5 +201,5 @@ sub insertIntoDb {
 
 		#sayLog "Inserted: $link" if($DEBUG);
 	}
-	#$query->finish();
+	$dbh->commit();
 }
