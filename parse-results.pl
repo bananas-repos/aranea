@@ -68,7 +68,7 @@ $query->execute(@queryIds);
 while(my @row = $query->fetchrow_array) {
 	$baseUrls{$row[0]} = $row[1];
 }
-$query->finish();
+#$query->finish();
 
 
 # get the string to ignore
@@ -80,7 +80,7 @@ $query->execute();
 while(my @row = $query->fetchrow) {
 	push(@urlStringsToIgnore, $row[0])
 }
-$query->finish();
+#$query->finish();
 
 
 ## prepare linkExtor
@@ -194,5 +194,5 @@ sub insertIntoDb {
 
 		#sayLog "Inserted: $link" if($DEBUG);
 	}
-	$query->finish();
+	#$query->finish();
 }

@@ -59,7 +59,7 @@ $query->execute();
 while(my @row = $query->fetchrow_array) {
 	$urlsToFetch{$row[0]} = $row[1];
 }
-$query->finish();
+#$query->finish();
 
 # successful fetches
 my @urlsFetched;
@@ -130,7 +130,7 @@ sub updateFetched {
 		$query->bind_param(1,$idToUpdate);
 		$query->execute();
 	}
-	$query->finish();
+	#$query->finish();
 	sayGreen "Update fetch timestamps done";
 }
 
@@ -145,6 +145,6 @@ sub updateFailed {
 		$query->bind_param(1,$idToUpdate);
 		$query->execute();
 	}
-	$query->finish();
+	#$query->finish();
 	sayGreen "Update fetch failed done";
 }

@@ -84,7 +84,7 @@ sayLog($queryStr) if $DEBUG;
 $query = $dbh->prepare($queryStr);
 foreach my $invalidId (@invalidUrls) {
 	$query->execute($invalidId);
-	$query->finish();
+	#$query->finish();
 	sayLog "Removed $invalidId from unique_domain" if $DEBUG;
 }
 sayGreen "Invalid unique_domain removed: ".scalar @invalidUrls;
@@ -103,7 +103,7 @@ while(my @row = $query->fetchrow_array) {
 	my $baseUrl = $row[1];
 	push(@toBeDeletedFromFetchAgain, $baseUrl);
 }
-$query->finish();
+#$query->finish();
 
 sayYellow "Remove baseurls from url_to_fetch: ".scalar @toBeDeletedFromFetchAgain;
 $queryStr = "DELETE FROM url_to_fetch WHERE `baseurl` = ?";
@@ -111,7 +111,7 @@ sayLog($queryStr) if $DEBUG;
 $query = $dbh->prepare($queryStr);
 foreach my $baseUrl (@toBeDeletedFromFetchAgain) {
 	$query->execute($baseUrl);
-	$query->finish();
+	#$query->finish();
 	sayLog "Removed $baseUrl from url_to_fetch" if $DEBUG;
 }
 sayGreen "Removed baseurls from url_to_fetch: ".scalar @toBeDeletedFromFetchAgain;
