@@ -75,18 +75,19 @@ my $request_headers = [
 ];
 my $ua = LWP::UserAgent->new();
 $ua->timeout($config->get("UA_TIMEOUT"));
+$ua->max_size($config->get("MAX_BYTES_PER_PAGE"));
 
 ## now loop over them and store the results
 my $counter = 0;
-my $fetchedData;
 while ( my ($id, $url) = each %urlsToFetch ) {
     sayYellow "Fetching: $id $url";
 
     my $req = HTTP::Request->new(GET => $url, $request_headers);
-    my $res = $ua->request($req, \&getCallback);
+    my $res = $ua->request($req);
     if ($res->is_success) {
         # callback tells us to stop
-        if($res->header('X-Died')) {
+        if($res->header('Client-Aborted')) {
+            sayYellow "Aborted, too big.";
             next;
         }
         if(index($res->content_type, "text/html") == -1) {
@@ -116,7 +117,6 @@ while ( my ($id, $url) = each %urlsToFetch ) {
     }
 
     $counter++;
-    $fetchedData = 0;
 }
 updateFetched($dbh, @urlsFetched);
 updateFailed($dbh, @urlsFailed);
@@ -155,15 +155,3 @@ sub updateFailed {
     sayGreen "Update fetch failed done";
 }
 
-## callback for request to check the already downloaded size.
-## Avoid big downloads
-## $fetchedData is set and reset out this sub
-## the die sets x-died header
-sub getCallback {
-    my ( $chunk, $res, $proto ) = @_;
-    $fetchedData .= $chunk;
-    if(length($fetchedData) > $config->get("MAX_BYTES_PER_PAGE")) {
-        sayLog "Download size maximum reached." if($DEBUG);
-        die();
-    }
-}
