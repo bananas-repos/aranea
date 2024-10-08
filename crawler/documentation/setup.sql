@@ -14,9 +14,9 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `unique_domain` (
   `id` int(11) NOT NULL,
-  `url` varchar(255) COLLATE utf8mb4_bin NOT NULL,
+  `url` varchar(255) COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `created` datetime NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -25,13 +25,13 @@ CREATE TABLE `unique_domain` (
 --
 
 CREATE TABLE `url_to_fetch` (
-  `id` char(32) COLLATE utf8mb4_bin NOT NULL,
-  `url` text COLLATE utf8mb4_bin NOT NULL,
-  `baseurl` varchar(255) COLLATE utf8mb4_bin NOT NULL,
+  `id` char(32) COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `url` text COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `baseurl` varchar(255) COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `created` datetime NOT NULL,
   `last_fetched` datetime DEFAULT NULL,
   `fetch_failed` tinyint(1) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -41,9 +41,9 @@ CREATE TABLE `url_to_fetch` (
 
 CREATE TABLE `url_to_ignore` (
   `id` int(11) NOT NULL,
-  `searchfor` varchar(255) COLLATE utf8mb4_bin NOT NULL,
+  `searchfor` varchar(255) COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `created` datetime NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `url_to_ignore`
