@@ -27,3 +27,8 @@ The table `url_to_ignore` does have a small amount of domains
 and part of domains which will be ignored.  Adding a global SPAM list would be overkill.
 
 A good idea is to run it with a DNS filter, which has a good blocklist.
+
+# Webinterface
+
+The folder `webroot` does contain a webinterface which displays the gathered data and status.
+It does not provide a way to execute the crawler.
