@@ -41,7 +41,8 @@ die "Could not read config! $ConfigReader::Simple::ERROR\n" unless ref $config;
 my %dbAttr = (
     PrintError=>0,# turn off error reporting via warn()
     RaiseError=>1, # turn on error reporting via die()
-    AutoCommit=>0 # manually use transactions
+    AutoCommit=>0, # manually use transactions
+    mysql_enable_utf8mb4 => 1
 );
 my $dbDsn = "DBI:mysql:database=".$config->get("DB_NAME").";host=".$config->get("DB_HOST").";port=".$config->get("DB_PORT");
 my $dbh = DBI->connect($dbDsn,$config->get("DB_USER"),$config->get("DB_PASS"), \%dbAttr);
