@@ -9,13 +9,24 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
+-- Table structure for table `stats`
+--
+
+CREATE TABLE `stats` (
+  `action` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `value` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `unique_domain`
 --
 
 CREATE TABLE `unique_domain` (
-  `id` int(11) NOT NULL,
-  `url` varchar(255) COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `created` datetime NOT NULL DEFAULT current_timestamp()
+  `id` int NOT NULL,
+  `url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -25,12 +36,12 @@ CREATE TABLE `unique_domain` (
 --
 
 CREATE TABLE `url_to_fetch` (
-  `id` char(32) COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `url` text COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `baseurl` varchar(255) COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `id` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `url` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `baseurl` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `created` datetime NOT NULL,
   `last_fetched` datetime DEFAULT NULL,
-  `fetch_failed` tinyint(1) NOT NULL DEFAULT 0
+  `fetch_failed` tinyint(1) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -40,9 +51,9 @@ CREATE TABLE `url_to_fetch` (
 --
 
 CREATE TABLE `url_to_ignore` (
-  `id` int(11) NOT NULL,
-  `searchfor` varchar(255) COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `created` datetime NOT NULL DEFAULT current_timestamp()
+  `id` int NOT NULL,
+  `searchfor` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `created` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
@@ -104,6 +115,12 @@ INSERT INTO `url_to_ignore` (`id`, `searchfor`, `created`) VALUES
 --
 
 --
+-- Indexes for table `stats`
+--
+ALTER TABLE `stats`
+  ADD PRIMARY KEY (`action`);
+
+--
 -- Indexes for table `unique_domain`
 --
 ALTER TABLE `unique_domain`
@@ -134,13 +151,13 @@ ALTER TABLE `url_to_ignore`
 -- AUTO_INCREMENT for table `unique_domain`
 --
 ALTER TABLE `unique_domain`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `url_to_ignore`
 --
 ALTER TABLE `url_to_ignore`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=56;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
