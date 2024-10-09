@@ -80,6 +80,8 @@ $ua->max_size($config->get("MAX_BYTES_PER_PAGE"));
 
 ## now loop over them and store the results
 my $counter = 0;
+my $allFetched = 0;
+my $allFailed = 0;
 while ( my ($id, $url) = each %urlsToFetch ) {
     sayYellow "Fetching: $id $url";
 
@@ -89,22 +91,26 @@ while ( my ($id, $url) = each %urlsToFetch ) {
         # callback tells us to stop
         if($res->header('Client-Aborted')) {
             sayYellow "Aborted, too big.";
+            $allFailed++;
             next;
         }
         if(index($res->content_type, "text/html") == -1) {
             sayYellow "Fetching: $id ignored. Not html";
             push(@urlsFailed, $id);
+            $allFailed++;
             next;
         }
         open(my $fh, '>:encoding(UTF-8)', "storage/$id.result") or die "Could not open file 'storage/$id.result' $!";
         print $fh $res->decoded_content();
         close($fh);
         push(@urlsFetched, $id);
+        $allFetched++;
         sayGreen"Fetching: $id ok";
     }
     else {
         sayRed "Fetching: $id failed: $res->code ".$res->status_line;
         push(@urlsFailed, $id);
+        $allFailed++;
     }
 
     if($counter >= $config->get("FETCH_URLS_PER_PACKAGE")) {
@@ -122,6 +128,25 @@ while ( my ($id, $url) = each %urlsToFetch ) {
 updateFetched($dbh, @urlsFetched);
 updateFailed($dbh, @urlsFailed);
 
+# some stats stuff
+my $queryStr = "INSERT INTO `stats` SET `action` = 'fetch', `value` = NOW()
+			ON DUPLICATE KEY UPDATE `value` = NOW()";
+$query = $dbh->prepare($queryStr);
+$query->execute();
+
+$queryStr = "INSERT INTO `stats` SET `action` = 'fetchfailed', `value` = '".$allFailed."'
+			ON DUPLICATE KEY UPDATE `value` = '".$allFailed."'";
+$query = $dbh->prepare($queryStr);
+$query->execute();
+
+$queryStr = "INSERT INTO `stats` SET `action` = 'fetchsuccess', `value` = '$allFetched'
+			ON DUPLICATE KEY UPDATE `value` = '$allFetched'";
+$query = $dbh->prepare($queryStr);
+$query->execute();
+
+$dbh->commit();
+
+# end
 $dbh->disconnect();
 sayGreen "Fetch complete";
 

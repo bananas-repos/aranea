@@ -130,6 +130,12 @@ foreach my $resultFile (@results) {
 @links = cleanLinks($dbh, \@links, \@urlStringsToIgnore);
 insertIntoDb($dbh, \@links);
 
+$queryStr = "INSERT INTO `stats` SET `action` = 'parse', `value` = NOW()
+			ON DUPLICATE KEY UPDATE `value` = NOW()";
+$query = $dbh->prepare($queryStr);
+$query->execute();
+$dbh->commit();
+
 $dbh->disconnect();
 sayGreen "Parse complete";
 
@@ -166,18 +172,22 @@ sub insertIntoDb {
 	$query = $dbh->prepare($queryStr);
 	my $md5 = Digest::MD5->new;
 	my $counter = 0;
+	my $allLinks = 0;
+	my $allFailedLinks = 0;
 	foreach my $link (@links) {
 
 		sayLog $link if ($DEBUG);
 
 		if(!is_uri($link)) {
 			sayYellow "Ignore URL it is invalid: $link";
+			$allFailedLinks++;
 			next;
 		}
 
 		my $url = url($link);
 		if(!defined($url->scheme) || ($url->scheme ne "http" && $url->scheme ne "https")) {
 			sayYellow "Ignore URL because of scheme: $link";
+			$allFailedLinks++;
 			next;
 		}
 
@@ -187,6 +197,7 @@ sub insertIntoDb {
 		$md5->reset;
 
 		$counter++;
+		$allLinks++;
 
 		if($counter >= 500) {
 			$counter = 0;
@@ -203,5 +214,17 @@ sub insertIntoDb {
 		#sayLog "Inserted: $link" if($DEBUG);
 	}
 	sayYellow "Final commit";
+
+	# stats stuff
+	$queryStr = "INSERT INTO `stats` SET `action` = 'parsesuccess', `value` = '$allLinks'
+			ON DUPLICATE KEY UPDATE `value` = '$allLinks'";
+	$query = $dbh->prepare($queryStr);
+	$query->execute();
+
+	$queryStr = "INSERT INTO `stats` SET `action` = 'parsefailed', `value` = '$allFailedLinks'
+			ON DUPLICATE KEY UPDATE `value` = '$allFailedLinks'";
+	$query = $dbh->prepare($queryStr);
+	$query->execute();
+
 	$dbh->commit();
 }
