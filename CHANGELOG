@@ -1,3 +1,9 @@
+0.3
++ Add: Web interface
++ Folder structure to separate crawler and web interface.
++ Setup sql file changed. Creation of the database needs to be done beforehand.
++ Updated documentation.
+
 0.2
 + Cleanups
 + License change
