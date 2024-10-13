@@ -24,7 +24,7 @@ use DateTime;
 use Exporter qw(import);
 
 
-our @EXPORT_OK = qw(sayLog sayYellow sayGreen sayRed);
+our @EXPORT_OK = qw(sayLog sayYellow sayGreen sayRed addToStats);
 
 sub sayLog {
 	my ($string) = @_;
@@ -48,6 +48,26 @@ sub sayRed {
 	my ($string) = @_;
 	my $dt = DateTime->now;
 	say BOLD, RED, "[".$dt->datetime."] ".$string, RESET;
+}
+
+## subroutine to add something to the stats table
+## if $value or $onDuplicateValue is empty, NOW() is used. This is done with the COALESCE mysql method
+sub addToStats {
+	my ($dbh, $action, $value, $onDuplicateValue) = @_;
+
+	if(!defined $action || $action eq "") {
+		return;
+	}
+
+	my $queryStr = "INSERT INTO `stats` SET `action` = ?, `value` = COALESCE(?, NOW())";
+	$queryStr .= " ON DUPLICATE KEY UPDATE `value` = COALESCE(?, NOW())";
+	my $query = $dbh->prepare($queryStr);
+
+	$query->bind_param(1,$action);
+	$query->bind_param(2,$value);
+	$query->bind_param(3,$onDuplicateValue);
+
+	$query->execute();
 }
 
 1;

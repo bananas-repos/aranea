@@ -23,7 +23,7 @@ use Data::Dumper;
 use Term::ANSIColor qw(:constants);
 
 use lib './lib';
-use Aranea::Common qw(sayLog sayYellow sayGreen sayRed);
+use Aranea::Common qw(sayLog sayYellow sayGreen sayRed addToStats);
 
 use open qw( :std :encoding(UTF-8) );
 use DBI;
@@ -101,6 +101,7 @@ while ( my ($id, $url) = each %urlsToFetch ) {
             next;
         }
         open(my $fh, '>:encoding(UTF-8)', "storage/$id.result") or die "Could not open file 'storage/$id.result' $!";
+        print $fh $url."\n"; # to know where it comes from
         print $fh $res->decoded_content();
         close($fh);
         push(@urlsFetched, $id);
@@ -129,22 +130,11 @@ updateFetched($dbh, @urlsFetched);
 updateFailed($dbh, @urlsFailed);
 
 # some stats stuff
-my $queryStr = "INSERT INTO `stats` SET `action` = 'fetch', `value` = NOW()
-			ON DUPLICATE KEY UPDATE `value` = NOW()";
-$query = $dbh->prepare($queryStr);
-$query->execute();
-
-$queryStr = "INSERT INTO `stats` SET `action` = 'fetchfailed', `value` = '".$allFailed."'
-			ON DUPLICATE KEY UPDATE `value` = '".$allFailed."'";
-$query = $dbh->prepare($queryStr);
-$query->execute();
-
-$queryStr = "INSERT INTO `stats` SET `action` = 'fetchsuccess', `value` = '$allFetched'
-			ON DUPLICATE KEY UPDATE `value` = '$allFetched'";
-$query = $dbh->prepare($queryStr);
-$query->execute();
-
+addToStats($dbh, 'fetch');
+addToStats($dbh, 'fetchfailed', $allFailed, $allFailed);
+addToStats($dbh, 'fetchsuccess', $allFetched, $allFetched);
 $dbh->commit();
+
 
 # end
 $dbh->disconnect();
@@ -155,6 +145,7 @@ sayGreen "Fetch complete";
 ## update last_fetched in the table
 sub updateFetched {
     my ($dbh, @urls) = @_;
+
     sayYellow "Update fetch timestamps: ".scalar @urls;
     $query = $dbh->prepare("UPDATE `url_to_fetch` SET `last_fetched` = NOW() WHERE `id` = ?");
     foreach my $idToUpdate (@urls) {
@@ -171,7 +162,7 @@ sub updateFailed {
     my ($dbh, @urls) = @_;
 
     sayYellow "Update fetch failed: ".scalar @urls;
-    $query = $dbh->prepare("UPDATE `url_to_fetch` SET `fetch_failed` = 1 WHERE `id` = ?");
+    $query = $dbh->prepare("UPDATE `url_to_fetch` SET `fetch_failed` = 1, `last_fetched` = NOW() WHERE `id` = ?");
     foreach my $idToUpdate (@urls) {
         sayLog "Update fetch failed for: $idToUpdate" if($DEBUG);
         $query->bind_param(1,$idToUpdate);
