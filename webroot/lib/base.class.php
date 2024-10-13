@@ -36,6 +36,14 @@ abstract class Base {
     protected array $_queryOptions;
 
     /**
+     * The available sort columns.
+     * Used in query and sort options in FE
+     *
+     * @var array|array[]
+     */
+    protected array $_sortOptions = array();
+
+    /**
      * Set the following options which can be used in DB queries
      * array(
      *  'limit' => RESULTS_PER_PAGE,
@@ -46,7 +54,7 @@ abstract class Base {
      *
      * @param array $options
      */
-    protected function setQueryOptions(array $options): void {
+    public function setQueryOptions(array $options): void {
 
         if(!isset($options['limit'])) $options['limit'] = 20;
         if(!isset($options['offset'])) $options['offset'] = false;
@@ -67,6 +75,15 @@ abstract class Base {
         }
 
         $this->_queryOptions = $options;
+    }
+
+    /**
+     * Return the available sort options and the active used one
+     *
+     * @return array|array[]
+     */
+    public function getSortOptions(): array {
+        return $this->_sortOptions;
     }
 
     /**

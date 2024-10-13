@@ -16,47 +16,39 @@
  * 2022 - 2024 https://www.bananas-playground.net/projekt/aranea
  */
 
-/**
- * Everything about the unique_domain table and its data
- */
+ /**
+  * Management class.
+  * Handles general stuff.
+  */
 
-require_once 'lib/base.class.php';
-
-class Domains extends Base {
-
+class Management {
     /**
-     * The available sort columns.
-     * Used in query and sort options in FE
+     * the database object
      *
-     * @var array|array[]
+     * @var mysqli
      */
-    public array $_sortOptions = array(
-        'default' => array('col' => 'd.url', 'displayText' => 'URL (default)'),
-        'created' => array('col' => 'd.created', 'displayText' => 'Created')
-    );
+    protected mysqli $_DB;
 
     /**
-     * Domains constructor.
+     * Management constructor.
      *
      * @param mysqli $databaseConnectionObject
      */
     public function __construct(mysqli $databaseConnectionObject) {
         $this->_DB = $databaseConnectionObject;
-        $this->_setDefaults();
     }
 
     /**
-     * latest 10 created entries in unique_domain
+     * Return the data from the stats table
      *
      * @return array
      */
-    public function latest(): array {
+    public function stats(): array {
         $ret = array();
 
-        $queryStr = "SELECT id,url
-                    FROM `unique_domain`
-                    ORDER BY created DESC
-                    LIMIT 10";
+        $queryStr = "SELECT `action`, `value`
+                        FROM `stats`
+                        ORDER BY `action` ASC";
         if(QUERY_DEBUG) Helper::sysLog("[QUERY] ".__METHOD__." query: ".Helper::cleanForLog($queryStr));
 
         try {

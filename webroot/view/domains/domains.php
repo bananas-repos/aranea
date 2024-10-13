@@ -15,18 +15,5 @@
  *
  * 2022 - 2024 https://www.bananas-playground.net/projekt/aranea
  */
-
-$TemplateData['pageTitle'] = 'Home';
-
-require_once 'lib/domains.class.php';
-$Domains = new Domains($DB);
-
-require_once 'lib/urls.class.php';
-$Urls = new Urls($DB);
-
-require_once 'lib/management.class.php';
-$Management = new Management($DB);
-
-$TemplateData['latestDomains'] = $Domains->latest();
-$TemplateData['latestUrls'] = $Urls->latest();
-$TemplateData['stats'] = $Management->stats();
+?>
+<h1>Domains</h1>

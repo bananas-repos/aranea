@@ -19,7 +19,7 @@
 <h1>Home</h1>
 
 <div class="uk-grid uk-child-width-1-1 uk-child-width-1-2@m uk-child-width-1-3@l">
-    <div>
+	<div class="uk-overflow-auto">
         <h3>Latest Domains</h3>
         <table class="uk-table uk-table-striped">
             <thead>
@@ -42,7 +42,7 @@
             </tbody>
         </table>
     </div>
-    <div>
+    <div class="uk-overflow-auto">
         <h3>Latest URLs</h3>
         <table class="uk-table uk-table-striped">
             <thead>
@@ -65,7 +65,7 @@
             </tbody>
         </table>
     </div>
-	<div>
+	<div class="uk-overflow-auto">
 		<h3>Info</h3>
 		<table class="uk-table uk-table-striped">
 			<thead>
@@ -76,11 +76,12 @@
 			</thead>
 			<tbody>
             <?php
-            if(!empty($TemplateData['latestUrls'])) {
-                foreach($TemplateData['latestUrls'] as $k=>$value) {
+            if(!empty($TemplateData['stats'])) {
+                foreach($TemplateData['stats'] as $k=>$value) {
                     ?>
 					<tr>
-						<td><?php echo $value['url']; ?></a></td>
+						<td><?php echo $value['action']; ?></a></td>
+						<td><?php echo $value['value']; ?></a></td>
 					</tr>
                     <?php
                 }

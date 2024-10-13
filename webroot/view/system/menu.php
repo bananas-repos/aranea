@@ -15,3 +15,26 @@
  *
  * 2022 - 2024 https://www.bananas-playground.net/projekt/aranea
  */
+?>
+<nav class="uk-navbar-container">
+    <div class="uk-container">
+        <div class="uk-navbar">
+            <div class="uk-navbar-left">
+                <ul class="uk-navbar-nav">
+                    <li>
+                        <a class="uk-navbar-item uk-logo" href="index.php" aria-label="Back to Home">&#128375;</a>
+                    </li>
+                    <li class="<?php if($_requestMode == "domains") echo 'uk-active'; ?>">
+                        <a href="index.php?p=packages">Domains</a>
+                    </li>
+                    <li class="<?php if($_requestMode == "urls") echo 'uk-active'; ?>">
+                        <a href="index.php?p=categories">URLs</a>
+                    </li>
+                    <li class="<?php if($_requestMode == "stats") echo 'uk-active'; ?>">
+                        <a href="index.php?p=stats">Stats</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
