@@ -1,17 +1,24 @@
+# Database settings
 DB_HOST=localhost
 DB_PORT=3306
 DB_NAME=aranea
 DB_USER=user
 DB_PASS=test
 
+# Settings for the http call
 UA_AGENT="Mozilla/5.0 (X11; Linux x86_64; rv:131.0) Gecko/20100101 Firefox/131.0"
 UA_ACCEPT="text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
 UA_LANG="en-US"
 UA_CACHE="no-cache"
 UA_TIMEOUT=5
 
+# Setting for fetch.pl
 FETCH_URLS_PER_RUN=5000
-FETCH_URLS_PER_PACKAGE=30
-PARSE_FILES_PER_PACKAGE=50
+FETCH_URLS_PER_PACKAGE=100
+FETCH_MAX_BYTES_PER_PAGE=5000000
+
+# Settings for parse.pl
+PARSE_URLS_PER_PACKAGE=500
+
+# Settings for cleanup
 CLEANUP_URLS_AMOUNT_ABOVE=40
-MAX_BYTES_PER_PAGE=5000000

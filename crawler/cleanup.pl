@@ -23,7 +23,7 @@ use Data::Dumper;
 use Term::ANSIColor qw(:constants);
 
 use lib './lib';
-use Aranea::Common qw(sayLog sayYellow sayGreen sayRed);
+use Aranea::Common qw(sayLog sayYellow sayGreen sayRed addToStats);
 
 use DBI;
 use ConfigReader::Simple;
@@ -35,7 +35,7 @@ my $DEBUG = 0;
 my $config = ConfigReader::Simple->new("config.txt");
 die "Could not read config! $ConfigReader::Simple::ERROR\n" unless ref $config;
 
-## DB connection
+# DB connection
 my %dbAttr = (
 	PrintError=>0,# turn off error reporting via warn()
     RaiseError=>1, # turn on error reporting via die()
@@ -46,15 +46,15 @@ my $dbh = DBI->connect($dbDsn,$config->get("DB_USER"),$config->get("DB_PASS"), \
 die "failed to connect to MySQL database:DBI->errstr()" unless($dbh);
 
 
-
-# update the unique domains
-my $queryStr = "INSERT IGNORE INTO unique_domain (url) select DISTINCT(baseurl) as url FROM url_to_fetch WHERE fetch_failed = 0";
+# Update the unique domains
+my $queryStr = "INSERT IGNORE INTO `unique_domain` (url) select DISTINCT(baseurl) as url FROM `url_to_fetch`
+				WHERE `fetch_failed` = 0 AND `last_fetched` IS NOT NULL";
 sayLog($queryStr) if $DEBUG;
 my $query = $dbh->prepare($queryStr);
 $query->execute();
 
-# now validate the unique ones
-$queryStr = "SELECT `id`, `url` FROM unique_domain";
+# Now validate the unique ones
+$queryStr = "SELECT `id`, `url` FROM `unique_domain`";
 sayLog($queryStr) if $DEBUG;
 $query = $dbh->prepare($queryStr);
 $query->execute();
@@ -80,7 +80,7 @@ while(my @row = $query->fetchrow_array) {
 }
 
 sayYellow "Invalid unique_domain: ".scalar @invalidUrls;
-$queryStr = "DELETE FROM unique_domain WHERE `id` = ?";
+$queryStr = "DELETE FROM `unique_domain` WHERE `id` = ?";
 sayLog($queryStr) if $DEBUG;
 $query = $dbh->prepare($queryStr);
 foreach my $invalidId (@invalidUrls) {
@@ -93,7 +93,7 @@ sayGreen "Invalid unique_domain removed: ".scalar @invalidUrls;
 # remove urls from fetch since we have enough already
 $queryStr = "SELECT count(baseurl) AS amount, baseurl
 				FROM `url_to_fetch`
-				WHERE last_fetched <> 0
+				WHERE `last_fetched` <> 0
 				GROUP BY baseurl
 				HAVING amount > ".$config->get("CLEANUP_URLS_AMOUNT_ABOVE");
 sayLog($queryStr) if $DEBUG;
@@ -130,9 +130,6 @@ $query = $dbh->prepare($queryStr);
 $query->execute();
 sayYellow "Remove invalid urls done";
 
-$queryStr = "INSERT INTO `stats` SET `action` = 'cleanup', `value` = NOW()
-			ON DUPLICATE KEY UPDATE `value` = NOW()";
-$query = $dbh->prepare($queryStr);
-$query->execute();
+addToStats($dbh, "cleanup");
 
 sayGreen "Cleanup complete";

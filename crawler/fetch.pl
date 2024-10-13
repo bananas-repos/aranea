@@ -37,7 +37,7 @@ my $config = ConfigReader::Simple->new("config.txt");
 die "Could not read config! $ConfigReader::Simple::ERROR\n" unless ref $config;
 
 
-## DB connection
+# DB connection
 my %dbAttr = (
     PrintError=>0,# turn off error reporting via warn()
     RaiseError=>1, # turn on error reporting via die()
@@ -46,10 +46,10 @@ my %dbAttr = (
 );
 my $dbDsn = "DBI:mysql:database=".$config->get("DB_NAME").";host=".$config->get("DB_HOST").";port=".$config->get("DB_PORT");
 my $dbh = DBI->connect($dbDsn,$config->get("DB_USER"),$config->get("DB_PASS"), \%dbAttr);
-die "failed to connect to MySQL database:DBI->errstr()" unless($dbh);
+die "Failed to connect to MySQL database:DBI->errstr()" unless($dbh);
 
 
-## fetch the urls to fetch from the table
+# Fetch the urls to fetch from the table
 my %urlsToFetch;
 my $query = $dbh->prepare("SELECT `id`, `url`
                             FROM `url_to_fetch`
@@ -62,11 +62,11 @@ while(my @row = $query->fetchrow_array) {
     $urlsToFetch{$row[0]} = $row[1];
 }
 
-# successful fetches
+# Successful and failed fetches
 my @urlsFetched;
 my @urlsFailed;
 
-# config the user agent for the request
+# Config the user agent for the request
 my $request_headers = [
     'User-Agent' => $config->get("UA_AGENT"),
     'Accept' => $config->get("UA_ACCEPT"),
@@ -76,9 +76,9 @@ my $request_headers = [
 ];
 my $ua = LWP::UserAgent->new();
 $ua->timeout($config->get("UA_TIMEOUT"));
-$ua->max_size($config->get("MAX_BYTES_PER_PAGE"));
+$ua->max_size($config->get("FETCH_MAX_BYTES_PER_PAGE"));
 
-## now loop over them and store the results
+## Now loop over them and store the results
 my $counter = 0;
 my $allFetched = 0;
 my $allFailed = 0;
@@ -101,7 +101,6 @@ while ( my ($id, $url) = each %urlsToFetch ) {
             next;
         }
         open(my $fh, '>:encoding(UTF-8)', "storage/$id.result") or die "Could not open file 'storage/$id.result' $!";
-        print $fh $url."\n"; # to know where it comes from
         print $fh $res->decoded_content();
         close($fh);
         push(@urlsFetched, $id);
@@ -117,6 +116,8 @@ while ( my ($id, $url) = each %urlsToFetch ) {
     if($counter >= $config->get("FETCH_URLS_PER_PACKAGE")) {
         updateFetched($dbh, @urlsFetched);
         updateFailed($dbh, @urlsFailed);
+        $dbh->commit();
+
         sleep(rand(7));
 
         $counter = 0;
@@ -128,6 +129,7 @@ while ( my ($id, $url) = each %urlsToFetch ) {
 }
 updateFetched($dbh, @urlsFetched);
 updateFailed($dbh, @urlsFailed);
+$dbh->commit();
 
 # some stats stuff
 addToStats($dbh, 'fetch');
@@ -153,7 +155,6 @@ sub updateFetched {
         $query->bind_param(1,$idToUpdate);
         $query->execute();
     }
-    $dbh->commit();
     sayGreen "Update fetch timestamps done";
 }
 
@@ -168,6 +169,5 @@ sub updateFailed {
         $query->bind_param(1,$idToUpdate);
         $query->execute();
     }
-    $dbh->commit();
     sayGreen "Update fetch failed done";
 }

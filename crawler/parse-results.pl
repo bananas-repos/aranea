@@ -23,7 +23,7 @@ use Data::Dumper;
 use Term::ANSIColor qw(:constants);
 
 use lib './lib';
-use Aranea::Common qw(sayLog sayYellow sayGreen sayRed);
+use Aranea::Common qw(sayLog sayYellow sayGreen sayRed addToStats);
 
 use open qw( :std :encoding(UTF-8) );
 use DBI;
@@ -38,11 +38,11 @@ my $DEBUG = 0;
 my $config = ConfigReader::Simple->new("config.txt");
 die "Could not read config! $ConfigReader::Simple::ERROR\n" unless ref $config;
 
-## DB connection
+# DB connection
 my %dbAttr = (
-	PrintError=>0,# turn off error reporting via warn()
-    RaiseError=>1, # turn on error reporting via die()
-	AutoCommit=>0, # manually use transactions
+	PrintError=>0,# Turn off error reporting via warn()
+    RaiseError=>1, # Turn on error reporting via die()
+	AutoCommit=>0, # Manually use transactions
 	mysql_enable_utf8mb4 => 1
 );
 my $dbDsn = "DBI:mysql:database=".$config->get("DB_NAME").";host=".$config->get("DB_HOST").";port=".$config->get("DB_PORT");
@@ -50,18 +50,18 @@ my $dbh = DBI->connect($dbDsn,$config->get("DB_USER"),$config->get("DB_PASS"), \
 die "failed to connect to MySQL database:DBI->errstr()" unless($dbh);
 
 
-## get the fetched files
+# Get the fetched files
 my @results = glob("storage/*.result");
 die "Nothing to parse. No files found." unless(@results);
 
-## build clean ids for query
+# Build clean ids for query
 my @queryIds = @results;
 foreach (@queryIds) {
 	$_ =~ s/.result//g;
 	$_ =~ s|storage/||g;
 }
 
-# get the baseurls
+# Get the baseurls to create absolute links to insert while parsing the file
 my %baseUrls;
 my $queryStr = "SELECT `id`, `baseurl` FROM `url_to_fetch` WHERE `id` IN (".join(', ', ('?') x @queryIds).")";
 sayLog($queryStr) if $DEBUG;
@@ -71,8 +71,7 @@ while(my @row = $query->fetchrow_array) {
 	$baseUrls{$row[0]} = $row[1];
 }
 
-
-# get the string to ignore
+# Get the string to ignore
 my @urlStringsToIgnore;
 $queryStr = "SELECT `searchfor` FROM `url_to_ignore`";
 sayLog($queryStr) if $DEBUG;
@@ -82,58 +81,48 @@ while(my @row = $query->fetchrow) {
 	push(@urlStringsToIgnore, $row[0])
 }
 
-
-## prepare linkExtor
+# Prepare linkExtor and its callback.
+# The callback extracts only a tags.
 my @links = ();
-my @workingLinks = ();
 sub leCallback {
    my($tag, %attr) = @_;
    return if $tag ne 'a';  # we only look closer at <a ...>
-   push(@workingLinks, values %attr);
+   # do some cleanup first to avoid empty or urls which point to itself
+   return if $attr{"href"} eq "";
+   return if rindex($attr{"href"}, "#", 0) != -1; # does not begin with #
+   return if $attr{"href"} eq "/";
+   push(@links, $attr{'href'});
 }
 my $le = HTML::LinkExtor->new(\&leCallback);
 
-## now parse each file and get the links
-my $counter = 0;
+# Now parse each file and get the links from it.
 foreach my $resultFile (@results) {
 	sayYellow "Parsing file: $resultFile";
-
+	@links = ();
 	my $fileId = basename($resultFile,".result");
 
 	if (exists $baseUrls{$fileId}) {
 		sayYellow "Baseurl: $baseUrls{$fileId}";
 
+		my $origin = $baseUrls{$fileId};
+
 		$le->parse_file($resultFile);
-		@workingLinks = map { $_ = url($_, $baseUrls{$fileId})->abs->as_string; } @workingLinks;
-		push(@links,@workingLinks);
+
+		# Create absolute links with the help of the baseurl if the url is not already absolute
+		@links = map { $_ = url($_, $origin)->abs->as_string; } @links;
+
+		@links = cleanLinks(\@links, \@urlStringsToIgnore);
+		insertIntoDb($dbh, \@links, $origin);
 
 		unlink($resultFile);
-		sayGreen "Parsing done: ".scalar @workingLinks;
+		sayGreen "Parsing done: ".scalar @links;
 	}
 	else {
 		sayRed "No entry found for file $resultFile";
 	}
-
-	if($counter >= $config->get("PARSE_FILES_PER_PACKAGE")) {
-
-		@links = cleanLinks($dbh, \@links, \@urlStringsToIgnore);
-		insertIntoDb($dbh, \@links);
-
-		$counter = 0;
-		@links = ();
-	}
-
-	@workingLinks = ();
-	$counter++;
 }
 
-@links = cleanLinks($dbh, \@links, \@urlStringsToIgnore);
-insertIntoDb($dbh, \@links);
-
-$queryStr = "INSERT INTO `stats` SET `action` = 'parse', `value` = NOW()
-			ON DUPLICATE KEY UPDATE `value` = NOW()";
-$query = $dbh->prepare($queryStr);
-$query->execute();
+addToStats($dbh, 'parse');
 $dbh->commit();
 
 $dbh->disconnect();
@@ -142,12 +131,12 @@ sayGreen "Parse complete";
 
 ## cleanup the found links
 sub cleanLinks {
-	my ($dbh, $linkArray, $urlStringsToIgnore) = @_;
+	my ($linkArray, $urlStringsToIgnore) = @_;
 	my @linkArray = @{ $linkArray };
-	my @urlStringsToIgnore = @{ $urlStringsToIgnore };
+	my @urlsToIgnore = @{ $urlStringsToIgnore };
 
 	sayYellow "Clean found links: ".scalar @linkArray;
-	foreach my $toSearch (@urlStringsToIgnore) {
+	foreach my $toSearch (@urlsToIgnore) {
 		sayYellow "Clean links from: ".$toSearch;
 		@linkArray = grep {!/$toSearch/i} @linkArray;
 	}
@@ -159,7 +148,7 @@ sub cleanLinks {
 
 ## update the DB with the new found links
 sub insertIntoDb {
-	my ($dbh, $links) = @_;
+	my ($dbh, $links, $origin) = @_;
 	my @links = @{ $links };
 
 	sayYellow "Insert links into DB: ".scalar @links;
@@ -170,6 +159,16 @@ sub insertIntoDb {
 					`created` = NOW()";
 	sayLog $queryStr if $DEBUG;
 	$query = $dbh->prepare($queryStr);
+
+	my $queryOriginStr = "INSERT INTO `url_origin` SET
+						`origin` = ?,
+						`target` = ?,
+						`created` = NOW(),
+						`amount` = 1
+						ON DUPLICATE KEY UPDATE `amount` = `amount`+1";
+	sayLog $queryOriginStr if $DEBUG;
+	my $queryOrigin = $dbh->prepare($queryOriginStr);
+
 	my $md5 = Digest::MD5->new;
 	my $counter = 0;
 	my $allLinks = 0;
@@ -193,38 +192,27 @@ sub insertIntoDb {
 
 		$md5->add($link);
 		my $digest = $md5->hexdigest;
-		$query->execute($digest, $link, $url->scheme."://".$url->host);
+		my $baseurl = $url->scheme."://".$url->host;
+		$query->execute($digest, $link, $baseurl);
 		$md5->reset;
+
+		# update relation
+		$queryOrigin->execute($origin, $baseurl) if($origin ne $baseurl);
 
 		$counter++;
 		$allLinks++;
 
-		if($counter >= 500) {
+		if($counter >= $config->get("PARSE_URLS_PER_PACKAGE")) {
 			$counter = 0;
-			sayYellow "Commit counter of 500 reached. Commiting";
+			sayYellow "Commit counter of PARSE_URLS_PER_PACKAGE reached. Commiting";
 			$dbh->commit();
 		}
-
-		#sayLog $digest if ($DEBUG);
-		#sayLog $url->scheme if ($DEBUG);
-		#sayLog $url->host if ($DEBUG);
-		#sayLog $query->{Statement} if ($DEBUG);
-		#sayLog Dumper($query->{ParamValues}) if ($DEBUG);
-
-		#sayLog "Inserted: $link" if($DEBUG);
 	}
-	sayYellow "Final commit";
 
 	# stats stuff
-	$queryStr = "INSERT INTO `stats` SET `action` = 'parsesuccess', `value` = '$allLinks'
-			ON DUPLICATE KEY UPDATE `value` = '$allLinks'";
-	$query = $dbh->prepare($queryStr);
-	$query->execute();
+	addToStats($dbh, 'parsesuccess', $allLinks, $allLinks);
+	addToStats($dbh, 'parsefailed', $allFailedLinks, $allFailedLinks);
 
-	$queryStr = "INSERT INTO `stats` SET `action` = 'parsefailed', `value` = '$allFailedLinks'
-			ON DUPLICATE KEY UPDATE `value` = '$allFailedLinks'";
-	$query = $dbh->prepare($queryStr);
-	$query->execute();
-
+	sayYellow "Final commit";
 	$dbh->commit();
 }

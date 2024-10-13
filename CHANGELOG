@@ -1,4 +1,5 @@
 0.3
++ Crawler config change. Please update config first. Compare it with config.default.txt
 + Add: Web interface
 + Folder structure to separate crawler and web interface.
 + Setup sql file changed. Creation of the database needs to be done beforehand.
@@ -10,7 +11,7 @@
 + Some db improvements
 + Default config file added
 + Updated requirements file
-+ Avoid big downloads with MAX_BYTES_PER_PAGE setting.
++ Avoid big downloads with FETCH_MAX_BYTES_PER_PAGE setting.
 
 0.1
 + initial release
