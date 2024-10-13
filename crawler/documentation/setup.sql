@@ -12,10 +12,11 @@ SET time_zone = "+00:00";
 -- Table structure for table `stats`
 --
 
+DROP TABLE IF EXISTS `stats`;
 CREATE TABLE `stats` (
-  `action` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `value` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `action` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci NOT NULL,
+  `value` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci;
 
 -- --------------------------------------------------------
 
@@ -23,11 +24,26 @@ CREATE TABLE `stats` (
 -- Table structure for table `unique_domain`
 --
 
+DROP TABLE IF EXISTS `unique_domain`;
 CREATE TABLE `unique_domain` (
   `id` int NOT NULL,
-  `url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci NOT NULL,
   `created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `url_origin`
+--
+
+DROP TABLE IF EXISTS `url_origin`;
+CREATE TABLE `url_origin` (
+  `origin` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci NOT NULL,
+  `target` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci NOT NULL,
+  `created` datetime NOT NULL,
+  `amount` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci;
 
 -- --------------------------------------------------------
 
@@ -35,14 +51,15 @@ CREATE TABLE `unique_domain` (
 -- Table structure for table `url_to_fetch`
 --
 
+DROP TABLE IF EXISTS `url_to_fetch`;
 CREATE TABLE `url_to_fetch` (
-  `id` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `url` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `baseurl` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `id` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci NOT NULL,
+  `url` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci NOT NULL,
+  `baseurl` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci NOT NULL,
   `created` datetime NOT NULL,
   `last_fetched` datetime DEFAULT NULL,
   `fetch_failed` tinyint(1) NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci;
 
 -- --------------------------------------------------------
 
@@ -50,11 +67,12 @@ CREATE TABLE `url_to_fetch` (
 -- Table structure for table `url_to_ignore`
 --
 
+DROP TABLE IF EXISTS `url_to_ignore`;
 CREATE TABLE `url_to_ignore` (
   `id` int NOT NULL,
-  `searchfor` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `searchfor` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci NOT NULL,
   `created` datetime NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci;
 
 --
 -- Dumping data for table `url_to_ignore`
@@ -125,6 +143,12 @@ ALTER TABLE `stats`
 ALTER TABLE `unique_domain`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `url` (`url`);
+
+--
+-- Indexes for table `url_origin`
+--
+ALTER TABLE `url_origin`
+  ADD UNIQUE KEY `origin` (`origin`,`target`);
 
 --
 -- Indexes for table `url_to_fetch`
