@@ -90,14 +90,15 @@ while ( my ($id, $url) = each %urlsToFetch ) {
     if ($res->is_success) {
         # callback tells us to stop
         if($res->header('Client-Aborted')) {
-            sayYellow "Aborted, too big.";
+            push(@urlsFailed, $id)
             $allFailed++;
+            sayYellow "Aborted, too big.";
             next;
         }
         if(index($res->content_type, "text/html") == -1) {
-            sayYellow "Fetching: $id ignored. Not html";
             push(@urlsFailed, $id);
             $allFailed++;
+            sayYellow "Fetching: $id ignored. Not html";
             next;
         }
         open(my $fh, '>:encoding(UTF-8)', "storage/$id.result") or die "Could not open file 'storage/$id.result' $!";
@@ -108,9 +109,9 @@ while ( my ($id, $url) = each %urlsToFetch ) {
         sayGreen"Fetching: $id ok";
     }
     else {
-        sayRed "Fetching: $id failed: $res->code ".$res->status_line;
         push(@urlsFailed, $id);
         $allFailed++;
+        sayRed "Fetching: $id failed: $res->code ".$res->status_line;
     }
 
     if($counter >= $config->get("FETCH_URLS_PER_PACKAGE")) {
