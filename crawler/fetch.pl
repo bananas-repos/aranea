@@ -44,6 +44,7 @@ my %dbAttr = (
     AutoCommit=>0, # manually use transactions
     mysql_enable_utf8mb4 => 1
 );
+# mysql_auto_reconnect
 my $dbDsn = "DBI:mysql:database=".$config->get("DB_NAME").";host=".$config->get("DB_HOST").";port=".$config->get("DB_PORT");
 my $dbh = DBI->connect($dbDsn,$config->get("DB_USER"),$config->get("DB_PASS"), \%dbAttr);
 die "Failed to connect to MySQL database:DBI->errstr()" unless($dbh);
@@ -149,6 +150,10 @@ sayGreen "Fetch complete";
 sub updateFetched {
     my ($dbh, @urls) = @_;
 
+    if (!$dbh->ping) {
+        $dbh = $dbh->clone() or die "Cannot connect to db at updateFetched";
+    }
+
     sayYellow "Update fetch timestamps: ".scalar @urls;
     $query = $dbh->prepare("UPDATE `url_to_fetch` SET `last_fetched` = NOW() WHERE `id` = ?");
     foreach my $idToUpdate (@urls) {
@@ -162,6 +167,10 @@ sub updateFetched {
 ## update fetch_failed in the table
 sub updateFailed {
     my ($dbh, @urls) = @_;
+
+    if (!$dbh->ping) {
+        $dbh = $dbh->clone() or die "Cannot connect to db at updateFailed";
+    }
 
     sayYellow "Update fetch failed: ".scalar @urls;
     $query = $dbh->prepare("UPDATE `url_to_fetch` SET `fetch_failed` = 1, `last_fetched` = NOW() WHERE `id` = ?");
