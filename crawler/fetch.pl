@@ -91,7 +91,7 @@ while ( my ($id, $url) = each %urlsToFetch ) {
     if ($res->is_success) {
         # callback tells us to stop
         if($res->header('Client-Aborted')) {
-            push(@urlsFailed, $id)
+            push(@urlsFailed, $id);
             $allFailed++;
             sayYellow "Aborted, too big.";
             next;
