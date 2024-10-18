@@ -117,6 +117,7 @@ while ( my ($id, $url) = each %urlsToFetch ) {
 
     if($counter >= $config->get("FETCH_URLS_PER_PACKAGE")) {
         updateFetched($dbh, @urlsFetched);
+        $dbh->commit();
         updateFailed($dbh, @urlsFailed);
         $dbh->commit();
 
@@ -130,6 +131,7 @@ while ( my ($id, $url) = each %urlsToFetch ) {
     $counter++;
 }
 updateFetched($dbh, @urlsFetched);
+$dbh->commit();
 updateFailed($dbh, @urlsFailed);
 $dbh->commit();
 
