@@ -8,7 +8,7 @@ The aim is to gather unique domains to show what is out there.
 ## Fetch
 
 It starts with a given set of URL(s) and parses them for more
-URLs. Stores them and fetches them too. `perl fetch.pl`
+URLs. Stores them and fetches them too. Execute: `perl fetch.pl`
 
 ## Parse
 
