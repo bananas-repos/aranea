@@ -33,10 +33,21 @@ use URI::URL;
 use File::Basename;
 use Digest::MD5 qw(md5_hex);
 use Data::Validate::URI qw(is_uri);
+use Proc::Pidfile;
+use Cwd;
 
 my $DEBUG = 0;
 my $config = ConfigReader::Simple->new("config.txt");
 die "Could not read config! $ConfigReader::Simple::ERROR\n" unless ref $config;
+
+# create the PID file and exit silently if it is already running.
+my $currentdir = getcwd;
+my $pid = Proc::Pidfile->new(pidfile => $currentdir."/log/aranea.pid", silent => 1);
+
+if(!$DEBUG) {
+	open (my $LOG, '>>', 'log/aranea.log') or die "Could not open file 'log/aranea.log' $!";
+	select $LOG; $| = 1; # https://perl.plover.com/FAQs/Buffering.html
+}
 
 # DB connection
 my %dbAttr = (
@@ -125,8 +136,15 @@ foreach my $resultFile (@results) {
 addToStats($dbh, 'parse');
 $dbh->commit();
 
+# write itself to the last run file
+open(my $fh, '>:encoding(UTF-8)', "last.run") or die "Could not open file 'last.run' $!";
+print $fh "parse";
+close($fh);
+
+# end
 $dbh->disconnect();
 sayGreen "Parse complete";
+select STDOUT;
 
 
 ## cleanup the found links
@@ -137,7 +155,7 @@ sub cleanLinks {
 
 	sayYellow "Clean found links: ".scalar @linkArray;
 	foreach my $toSearch (@urlsToIgnore) {
-		sayYellow "Clean links from: ".$toSearch;
+		sayYellow "Clean links from: ".$toSearch if $DEBUG;
 		@linkArray = grep {!/$toSearch/i} @linkArray;
 	}
 	sayGreen "Cleaned found links: ".scalar @linkArray;

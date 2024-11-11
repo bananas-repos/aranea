@@ -12,4 +12,4 @@ Use `setup.sql` to create the tables into your existing database: `mysql --user=
 
 Copy `config.default.txt` to `config.txt` and edit at least to match the database name and server settings.
 
-Make sure the directory `storage` can be written.
+Make sure the directory `storage` and `log` can be written.

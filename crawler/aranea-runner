@@ -1,0 +1,48 @@
+#!/bin/bash
+#
+# 2022 - 2024 https://www.bananas-playground.net/projekt/aranea
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see http://www.gnu.org/licenses/gpl-3.0.
+#
+# To be executed as a cron. Checks which part of the crawler is running and which needs to be run next.
+set -uo pipefail
+IFS=$'\n\t'
+
+err() {
+  echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')]: $*" >&2
+}
+
+declare -A COMMANDS
+COMMANDS["fetch"]="parse-results.pl"
+COMMANDS["parse"]="cleanup.pl"
+COMMANDS["cleanup"]="fetch.pl"
+
+CWD=$(pwd);
+PIDFILE="$CWD/log/aranea.pid";
+LASTRUNFILE="$CWD/last.run";
+TORUN="cleanup";
+
+if [ ! -e "$PIDFILE" ]; then
+	if [ -e "$LASTRUNFILE" ]; then
+		read -r LASTRUN < "$LASTRUNFILE";
+		TORUN="${LASTRUN//[[:blank:]]\n/}";
+	fi;
+
+	if [[ -v COMMANDS[$TORUN] ]]; then
+		/usr/bin/perl ${COMMANDS[$TORUN]};
+	else
+		err "Invalid contents of last run file: '${TORUN}'";
+		exit 1;
+	fi;
+fi;

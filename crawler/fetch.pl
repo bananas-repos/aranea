@@ -30,12 +30,22 @@ use DBI;
 use ConfigReader::Simple;
 use LWP::UserAgent;
 use HTTP::Request;
-
+use Proc::Pidfile;
+use Cwd;
 
 my $DEBUG = 0;
 my $config = ConfigReader::Simple->new("config.txt");
 die "Could not read config! $ConfigReader::Simple::ERROR\n" unless ref $config;
 
+# create the PID file and exit silently if it is already running.
+my $currentdir = getcwd;
+my $pid = Proc::Pidfile->new(pidfile => $currentdir."/log/aranea.pid", silent => 1);
+
+# write everything into log file
+if(!$DEBUG) {
+    open (my $LOG, '>>', 'log/aranea.log') or die "Could not open file 'log/aranea.log' $!";
+    select $LOG; $| = 1; # https://perl.plover.com/FAQs/Buffering.html
+}
 
 # DB connection
 my %dbAttr = (
@@ -137,12 +147,15 @@ addToStats($dbh, 'fetchfailed', $allFailed, $allFailed);
 addToStats($dbh, 'fetchsuccess', $allFetched, $allFetched);
 $dbh->commit();
 
+# write itself to the last run file
+open(my $fh, '>:encoding(UTF-8)', "last.run") or die "Could not open file 'last.run' $!";
+print $fh "fetch";
+close($fh);
 
 # end
 $dbh->disconnect();
 sayGreen "Fetch complete";
-
-
+select STDOUT;
 
 ## update last_fetched in the table
 sub updateFetched {

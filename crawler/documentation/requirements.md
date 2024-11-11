@@ -8,6 +8,7 @@ Extra modules along with the more already installed ones.
 
 + [ConfigReader::Simple](https://metacpan.org/pod/ConfigReader::Simple)
 + [Data::Validate::URI](https://metacpan.org/pod/Data::Validate::URI)
++ [Proc::Pidfile](https://metacpan.org/pod/Proc::Pidfile)
 
 ## Debian
 
@@ -20,3 +21,4 @@ Those are the ones which needed to be installed after a fresh debian(stable) ins
 + libdata-validate-uri-perl
 + libdbd-mysql-perl
 + libwww-perl
++ libproc-pid-file-perl

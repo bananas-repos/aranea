@@ -21,6 +21,13 @@ After a run cleanup will gather all the unique Domains into
 a table. Removes URLs from the fetch table which are already
 enough. `perl cleanup.pl`
 
+# Usage
+
+Either run `fetch.pl`, `parse-results.pl` and `cleanup.pl` in the given order manually
+or use `aranea-runner` with a cron. The cron schedule depends on the amount of URLs to be fetched and parsed.
+Higher numbers needs longer run times. So plan the schedule around that by running the perl files
+manually first.
+
 # Ignores
 
 The table `url_to_ignore` does have a small amount of domains
