@@ -21,4 +21,3 @@ Those are the ones which needed to be installed after a fresh debian(stable) ins
 + libdata-validate-uri-perl
 + libdbd-mysql-perl
 + libwww-perl
-+ libproc-pid-file-perl
