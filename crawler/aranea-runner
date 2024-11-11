@@ -30,7 +30,7 @@ COMMANDS["cleanup"]="fetch.pl"
 
 CWD=$(pwd);
 PIDFILE="$CWD/log/aranea.pid";
-LASTRUNFILE="$CWD/last.run";
+LASTRUNFILE="$CWD/log/last.run";
 TORUN="cleanup";
 
 if [ ! -e "$PIDFILE" ]; then

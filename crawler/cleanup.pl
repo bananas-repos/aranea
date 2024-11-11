@@ -143,7 +143,7 @@ sayYellow "Remove invalid urls done";
 addToStats($dbh, "cleanup");
 
 # write itself to the last run file
-open(my $fh, '>:encoding(UTF-8)', "last.run") or die "Could not open file 'last.run' $!";
+open(my $fh, '>:encoding(UTF-8)', "log/last.run") or die "Could not open file 'log/last.run' $!";
 print $fh "cleanup";
 close($fh);
 
