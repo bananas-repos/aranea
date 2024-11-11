@@ -6,6 +6,7 @@
 + Folder structure to separate crawler and web interface.
 + Setup sql file changed. Creation of the database needs to be done beforehand.
 + Updated documentation.
++ Added contribution and code of conduct information.
 
 0.2
 + Cleanups

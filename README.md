@@ -39,3 +39,13 @@ A good idea is to run it with a DNS filter, which has a good blocklist.
 
 The folder `webroot` does contain a webinterface which displays the gathered data and status.
 It does not provide a way to execute the crawler.
+
+# Contribute
+
+Want to contribute or found a problem?
+
+See Contributing document: CONTRIBUTING.md
+
+# Uses
+
+See uses document: USES
