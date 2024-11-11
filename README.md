@@ -8,7 +8,7 @@ The aim is to gather unique domains to show what is out there.
 ## Fetch
 
 It starts with a given set of URL(s) and parses them for more
-URLs. Stores them and fetches them too. `perl fetch.pl`
+URLs. Stores them and fetches them too. Execute: `perl fetch.pl`
 
 ## Parse
 
@@ -31,7 +31,7 @@ manually first.
 # Ignores
 
 The table `url_to_ignore` does have a small amount of domains
-and part of domains which will be ignored.  Adding a global SPAM list would be overkill.
+and part of domains which will be ignored. Adding a global SPAM list would be overkill.
 
 A good idea is to run it with a DNS filter, which has a good blocklist.
 
