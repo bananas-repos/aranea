@@ -1,3 +1,4 @@
 Set correct timezone. Maybe in config?
+Use system available perl modules to avoid local cpan usage.
 Some sort of matching against spam domain list?
 Documentation for web interface and installation.
