@@ -74,4 +74,71 @@ class Domains extends Base {
 
         return $ret;
     }
+
+    public function getDomains(): array {
+        $ret = array();
+
+        $querySelect = "SELECT d.id, d.url, d.created";
+        $queryFrom = " FROM `unique_domain` AS d";
+
+        $queryWhere = '';
+        if(!empty($this->_searchValue)) {
+            $queryWhere = " WHERE d.url";
+
+            if($this->_wildcardsearch) {
+                $queryWhere .= " LIKE '".$this->_DB->real_escape_string($this->_searchValue)."'";
+            } else {
+                $queryWhere .= " = '".$this->_DB->real_escape_string($this->_searchValue)."'";
+            }
+        }
+
+        $queryOrder = " ORDER BY";
+        if (!empty($this->_queryOptions['sort'])) {
+            $queryOrder .= " ".$this->_queryOptions['sort'];
+        }
+        else {
+            $queryOrder .= " ".$this->_sortOptions['default']['col'];
+        }
+
+        if (!empty($this->_queryOptions['sortDirection'])) {
+            $queryOrder .= " ".$this->_queryOptions['sortDirection'];
+        }
+        else {
+            $queryOrder .= " ASC";
+        }
+
+        $queryLimit = '';
+        if(!empty($this->_queryOptions['limit'])) {
+            $queryLimit .= " LIMIT ".$this->_queryOptions['limit'];
+            # offset can be 0
+            if($this->_queryOptions['offset'] !== false) {
+                $queryLimit .= " OFFSET ".$this->_queryOptions['offset'];
+            }
+        }
+
+        $queryStr = $querySelect.$queryFrom.$queryWhere.$queryOrder.$queryLimit;
+        if(QUERY_DEBUG) Helper::sysLog("[QUERY] ".__METHOD__." query: ".Helper::cleanForLog($queryStr));
+
+        try {
+            $query = $this->_DB->query($queryStr);
+
+            if($query !== false && $query->num_rows > 0) {
+                while(($result = $query->fetch_assoc()) != false) {
+                    $ret['results'][$result['id']] = $result;
+                }
+
+                $queryStrCount = "SELECT COUNT(*) AS amount ".$queryFrom.$queryWhere;
+
+                if(QUERY_DEBUG) Helper::sysLog("[QUERY] ".__METHOD__." query: ".Helper::cleanForLog($queryStrCount));
+                $query = $this->_DB->query($queryStrCount);
+                $result = $query->fetch_assoc();
+                $ret['amount'] = $result['amount'];
+            }
+        }
+        catch (Exception $e) {
+            Helper::sysLog("[ERROR] ".__METHOD__." mysql catch: ".$e->getMessage());
+        }
+
+        return $ret;
+    }
 }

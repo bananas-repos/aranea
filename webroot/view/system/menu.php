@@ -25,10 +25,10 @@
                         <a class="uk-navbar-item uk-logo" href="index.php" aria-label="Back to Home">&#128375;</a>
                     </li>
                     <li class="<?php if($_requestMode == "domains") echo 'uk-active'; ?>">
-                        <a href="index.php?p=packages">Domains</a>
+                        <a href="index.php?p=domains">Domains</a>
                     </li>
                     <li class="<?php if($_requestMode == "urls") echo 'uk-active'; ?>">
-                        <a href="index.php?p=categories">URLs</a>
+                        <a href="index.php?p=urls">URLs</a>
                     </li>
                     <li class="<?php if($_requestMode == "stats") echo 'uk-active'; ?>">
                         <a href="index.php?p=stats">Stats</a>

@@ -57,6 +57,36 @@ $queryOptions = array(
 ## pagination end
 
 
+$TemplateData['pageTitle'] = 'Search for domains';
+$TemplateData['searchresults'] = array();
+$TemplateData['searchInput'] = '';
+
+## search
+if(isset($_GET['st'])) {
+    $searchValue = trim($_GET['st']);
+    $searchValue = strtolower($searchValue);
+    $searchValue = urldecode($searchValue);
+    if(Helper::validate($searchValue,'nospaceP')) {
+        $Domains->setQueryOptions($queryOptions);
+        if($Domains->prepareSearchValue($searchValue)) {
+            $TemplateData['searchresults'] = $Domains->getDomains();
+
+            if(empty($TemplateData['searchresults'])) {
+                $messageData['status'] = "warning";
+                $messageData['message'] = "Nothing found for this search criteria.";
+            }
+
+            $TemplateData['searchInput'] = htmlspecialchars($searchValue);
+            $TemplateData['pagination']['currentGetParameters']['st'] = urlencode($searchValue);
+        } else {
+            $messageData['status'] = "danger";
+            $messageData['message'] = "Invalid search criteria. At least two (without wildcard) chars.";
+        }
+    }
+} else {
+    $Domains->setQueryOptions($queryOptions);
+    $TemplateData['searchresults'] = $Domains->getDomains();
+}
 
 ## pagination
 if(!empty($TemplateData['searchresults']['amount'])) {

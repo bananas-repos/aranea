@@ -44,6 +44,16 @@ abstract class Base {
     protected array $_sortOptions = array();
 
     /**
+     * @var string $_searchValue
+     */
+    protected string $_searchValue = '';
+
+    /**
+     * @var bool $_wildcardsearch
+     */
+    protected bool $_wildcardsearch = false;
+
+    /**
      * Set the following options which can be used in DB queries
      * array(
      *  'limit' => RESULTS_PER_PAGE,
@@ -84,6 +94,36 @@ abstract class Base {
      */
     public function getSortOptions(): array {
         return $this->_sortOptions;
+    }
+
+    /**
+     * Prepare and set the searchvalue.
+     * Check for wildcardsearch and make it safe
+     *
+     * @param string $searchValue
+     * @return bool
+     */
+    public function prepareSearchValue(string $searchValue): bool {
+        if(str_contains($searchValue,'*')) {
+            $this->_wildcardsearch = true;
+            $searchValue = preg_replace('/\*{1,}/', '%', $searchValue);
+
+            if(strlen($searchValue) < 3) {
+                return false;
+            }
+
+            if(strlen($searchValue) === 3) {
+                if(substr_count($searchValue, '%') > 1) return false;
+            }
+        }
+
+        if(strlen($searchValue) < 2) {
+            return false;
+        }
+
+        $this->_searchValue = $searchValue;
+
+        return true;
     }
 
     /**
