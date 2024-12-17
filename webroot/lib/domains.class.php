@@ -75,6 +75,12 @@ class Domains extends Base {
         return $ret;
     }
 
+    /**
+     * Select all the uniq domains.
+     * If searchterm is provided through prepareSearchValue(), do a search.
+     *
+     * @return array
+     */
     public function getDomains(): array {
         $ret = array();
 

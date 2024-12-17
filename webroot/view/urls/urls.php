@@ -16,7 +16,7 @@
  * 2022 - 2024 https://www.bananas-playground.net/projekt/aranea
  */
 ?>
-<h1>Domains</h1>
+<h1>URLs</h1>
 
 <form method="get" class="uk-form-stacked" action="#panchor" id="panchor">
 	<div class="uk-margin">
@@ -26,7 +26,7 @@
 		</div>
 	</div>
 	<div class="uk-margin">
-		<input type="hidden" name="p" value="domains" />
+		<input type="hidden" name="p" value="urls" />
 		<input class="uk-button uk-button-primary" type="submit" value="Search">
 	</div>
 </form>
@@ -37,7 +37,9 @@
 	<thead>
 	<tr>
 		<th role="columnheader">Url</th>
-		<th role="columnheader">Visit</th>
+		<th role="columnheader">Baseurl</th>
+		<th role="columnheader">Last fetched</th>
+		<th role="columnheader">Fetch failed</th>
 		<th role="columnheader">Created</th>
 		<th role="columnheader">Details</th>
 	</tr>
@@ -48,8 +50,10 @@
         foreach($TemplateData['searchresults']['results'] as $key=>$entry) {
             ?>
 			<tr>
-				<td><?php echo $entry['url']; ?></td>
-				<td><a href="<?php echo $entry['url']; ?>" target=_blank><span uk-icon="link-external"></span></a></td>
+				<td><?php echo $entry['url']; ?> <a href="<?php echo $entry['url']; ?>" target=_blank><span uk-icon="link-external"></span></a></td>
+				<td><?php echo $entry['baseurl']; ?></td>
+				<td><?php echo $entry['last_fetched']; ?></td>
+				<td><?php echo $entry['fetch_failed']; ?></td>
 				<td><?php echo $entry['created'] ?? ''; ?></td>
 				<td><a href="index.php?p=domain&id=<?php echo $entry['id']; ?>"><span uk-icon="more"></span></a></td>
 			</tr>
