@@ -18,6 +18,10 @@
 ?>
 <h1>URLs</h1>
 
+<p>
+	All URLs currently found. Either already crawled or to be crawled.
+</p>
+
 <form method="get" class="uk-form-stacked" action="#panchor" id="panchor">
 	<div class="uk-margin">
 		<label class="uk-form-label" for="url">URL</label>

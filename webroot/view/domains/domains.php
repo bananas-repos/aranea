@@ -18,6 +18,10 @@
 ?>
 <h1>Domains</h1>
 
+<p>
+	Result of all extracting the base domain from all crawled URLs.
+</p>
+
 <form method="get" class="uk-form-stacked" action="#panchor" id="panchor">
 	<div class="uk-margin">
 		<label class="uk-form-label" for="url">URL</label>

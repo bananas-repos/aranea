@@ -1,3 +1,5 @@
+Collect only "valid" addresses. Matching RFC does result in "strange" urls.
+Merge 301 redirects? (eg. http to https)
 Set correct timezone. Maybe in config?
 Use system available perl modules to avoid local cpan usage.
 Some sort of matching against spam domain list?
