@@ -32,7 +32,7 @@ use HTML::LinkExtor;
 use URI::URL;
 use File::Basename;
 use Digest::MD5 qw(md5_hex);
-use Data::Validate::URI qw(is_uri);
+use Data::Validate::URI qw(is_web_uri);
 use Proc::Pidfile;
 use Cwd;
 
@@ -195,7 +195,7 @@ sub insertIntoDb {
 
 		sayLog $link if ($DEBUG);
 
-		if(!is_uri($link)) {
+		if(!is_web_uri($link)) {
 			sayYellow "Ignore URL it is invalid: $link";
 			$allFailedLinks++;
 			next;

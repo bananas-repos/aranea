@@ -28,3 +28,8 @@ if(isset($_GET['id']) && !empty($_GET['id'])) {
 
 $TemplateData['pageTitle'] = 'URL details';
 $TemplateData['url'] = $Url->details($_id);
+
+if(empty($TemplateData['url'])) {
+    $messageData['status'] = "warning";
+    $messageData['message'] = "Invalid or not found.";
+}

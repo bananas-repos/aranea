@@ -23,14 +23,14 @@
         <td>URL</td>
         <td>
             <?php echo $TemplateData['url']['url'] ?? ''; ?>
-            <a href="<?php echo $TemplateData['url']['url']; ?>" target=_blank><span uk-icon="link-external"></span></a>
+            <a href="<?php echo $TemplateData['url']['url'] ?? ''; ?>" target=_blank><span uk-icon="link-external"></span></a>
         </td>
     </tr>
     <tr>
         <td>Baseurl</td>
         <td>
             <?php echo $TemplateData['url']['baseurl'] ?? ''; ?>
-            <a href="<?php echo $TemplateData['url']['baseurl']; ?>" target=_blank><span uk-icon="link-external"></span></a>
+            <a href="<?php echo $TemplateData['url']['baseurl'] ?? ''; ?>" target=_blank><span uk-icon="link-external"></span></a>
         </td>
     </tr>
     <tr>

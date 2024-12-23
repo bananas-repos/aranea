@@ -28,11 +28,11 @@ use Aranea::Common qw(sayLog sayYellow sayGreen sayRed addToStats);
 use DBI;
 use ConfigReader::Simple;
 use URI::URL;
-use Data::Validate::URI qw(is_uri);
+use Data::Validate::URI qw(is_web_uri);
 use Proc::Pidfile;
 use Cwd;
 
-my $DEBUG = 0;
+my $DEBUG = 1;
 my $config = ConfigReader::Simple->new("config.txt");
 die "Could not read config! $ConfigReader::Simple::ERROR\n" unless ref $config;
 
@@ -56,11 +56,37 @@ my $dbh = DBI->connect($dbDsn,$config->get("DB_USER"),$config->get("DB_PASS"), \
 die "failed to connect to MySQL database:DBI->errstr()" unless($dbh);
 
 
-# Update the unique domains
-my $queryStr = "INSERT IGNORE INTO `unique_domain` (url) select DISTINCT(baseurl) as url FROM `url_to_fetch`
-				WHERE `fetch_failed` = 0 AND `last_fetched` IS NOT NULL";
+# clean up url_to_fetch
+my @invalidFetchUrl = ();
+my $queryStr = "SELECT `id`, `url` FROM `url_to_fetch`
+				WHERE `fetch_failed` = 0 AND `last_fetched` IS NULL";
 sayLog($queryStr) if $DEBUG;
 my $query = $dbh->prepare($queryStr);
+$query->execute();
+while(my @row = $query->fetchrow_array) {
+	my $url = $row[1];
+	if(!is_web_uri($url)) {
+		push(@invalidFetchUrl, $row[0]);
+		sayLog "Not a valid URI $url" if $DEBUG;
+		sayYellow "Not a valid URI $url";
+	}
+}
+
+sayYellow "Invalid url_to_fetch: ".scalar @invalidFetchUrl;
+$queryStr = "DELETE FROM `url_to_fetch` WHERE `id` = ?";
+sayLog($queryStr) if $DEBUG;
+$query = $dbh->prepare($queryStr);
+foreach my $invalidId (@invalidFetchUrl) {
+	$query->execute($invalidId);
+	sayLog "Removed $invalidId from url_to_fetch" if $DEBUG;
+}
+sayGreen "Invalid url_to_fetch removed: ".scalar @invalidFetchUrl;
+
+# Update the unique domains
+$queryStr = "INSERT IGNORE INTO `unique_domain` (url) select DISTINCT(baseurl) as url FROM `url_to_fetch`
+				WHERE `fetch_failed` = 0 AND `last_fetched` IS NOT NULL";
+sayLog($queryStr) if $DEBUG;
+$query = $dbh->prepare($queryStr);
 $query->execute();
 
 # Now validate the unique ones
@@ -73,7 +99,7 @@ my @toBeDeletedFromFetchAgain = ();
 while(my @row = $query->fetchrow_array) {
 	my $link = $row[1];
 	my $id = $row[0];
-	if(!is_uri($link)) {
+	if(!is_web_uri($link)) {
 		sayYellow "Ignore URL it is invalid: $link";
 		push(@invalidUrls, $id);
 		push(@toBeDeletedFromFetchAgain, $link);
@@ -131,7 +157,7 @@ $query = $dbh->prepare($queryStr);
 $query->execute();
 sayGreen "Remove fetch_failed done";
 
-sayYellow "Remove invalid urls which the is_uri check does let pass";
+sayYellow "Remove invalid urls which the is_web_uri check does let pass";
 $queryStr = "DELETE FROM unique_domain WHERE `url` NOT LIKE '%.%'";
 $query = $dbh->prepare($queryStr);
 $query->execute();

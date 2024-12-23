@@ -1,12 +1,13 @@
 0.3
-+ Crawler config change. Please update config first. Compare it with config.default.txt
-+ New log folder. Create it and make sure it is writable.
++ Change: Crawler config change. Please update config first. Compare it with config.default.txt
++ Change: Setup sql file changed. Creation of the database needs to be done beforehand.
++ Add: New log folder. Create it and make sure it is writable.
 * Add: aranea-runner script to be used in a cron schedule.
 + Add: Web interface
 + Folder structure to separate crawler and web interface.
-+ Setup sql file changed. Creation of the database needs to be done beforehand.
 + Updated documentation.
 + Added contribution and code of conduct information.
++ Better URI validation and updated cleanup.
 
 0.2
 + Cleanups
