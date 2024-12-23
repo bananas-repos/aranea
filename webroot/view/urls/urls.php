@@ -59,7 +59,7 @@
 				<td><?php echo $entry['last_fetched']; ?></td>
 				<td><?php echo $entry['fetch_failed']; ?></td>
 				<td><?php echo $entry['created'] ?? ''; ?></td>
-				<td><a href="index.php?p=domain&id=<?php echo $entry['id']; ?>"><span uk-icon="more"></span></a></td>
+				<td><a href="index.php?p=url&id=<?php echo $entry['id']; ?>"><span uk-icon="more"></span></a></td>
 			</tr>
             <?php
         }

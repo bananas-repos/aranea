@@ -52,8 +52,9 @@ $ViewMessage = 'view/system/message.php';
 $ViewMenu = 'system/menu.php';
 # valid includes
 $_validPages["domains"] = "domains";
-$_validPages["urls"] = "urls";
 $_validPages["domain"] = "domain";
+$_validPages["urls"] = "urls";
+$_validPages["url"] = "url";
 
 $_requestMode = "home";
 if(isset($_GET['p']) && !empty($_GET['p'])) {

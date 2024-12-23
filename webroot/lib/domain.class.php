@@ -82,10 +82,20 @@ class Domain extends Base {
         return $ret;
     }
 
+    /**
+     * Relation from the url_origin table
+     * $key = from|to
+     * Which decides the col to be matched with the current loaded domain and which col is used as search
+     *
+     * @param string $key
+     * @return array
+     */
     public function relations(string $key): array {
         $ret = array();
 
         if(!empty($key) && !empty($this->_domain)) {
+            // w = where col
+            // s = search col
             $_rowName['from'] = array("w" => "target", "s" => "origin");
             $_rowName['to'] = array("w" => "origin", "s" => "target");
 

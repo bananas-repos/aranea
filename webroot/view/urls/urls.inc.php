@@ -16,7 +16,7 @@
  * 2022 - 2024 https://www.bananas-playground.net/projekt/aranea
  */
 
-$TemplateData['pageTitle'] = 'URLs';
+
 
 require_once 'lib/urls.class.php';
 $Urls = new Urls($DB);
@@ -55,7 +55,6 @@ $queryOptions = array(
     'sortDirection' => $_sortDirection
 );
 ## pagination end
-
 
 $TemplateData['pageTitle'] = 'Search for URLs';
 $TemplateData['searchresults'] = array();

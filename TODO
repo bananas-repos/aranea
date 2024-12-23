@@ -1,4 +1,5 @@
 Collect only "valid" addresses. Matching RFC does result in "strange" urls.
+Better naming in webcode...
 Merge 301 redirects? (eg. http to https)
 Set correct timezone. Maybe in config?
 Use system available perl modules to avoid local cpan usage.
