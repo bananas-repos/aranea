@@ -80,8 +80,16 @@
         foreach($TemplateData['searchresults']['results'] as $key=>$entry) {
             ?>
 			<tr>
-				<td><?php echo $entry['origin']; ?> <a href="<?php echo $entry['origin']; ?>" target=_blank><span uk-icon="link-external"></span></a></td>
-				<td><?php echo $entry['target']; ?> <a href="<?php echo $entry['target']; ?>" target=_blank><span uk-icon="link-external"></span></a></td>
+				<td>
+					<?php echo $entry['origin']; ?>
+					<a href="index.php?p=domains&st=<?php echo urlencode($entry['origin']); ?>"><span uk-icon="more"></span></a>
+					<a href="<?php echo $entry['origin']; ?>" target=_blank><span uk-icon="link-external"></span></a>
+				</td>
+				<td>
+					<?php echo $entry['target']; ?>
+					<a href="index.php?p=domains&st=<?php echo urlencode($entry['target']); ?>"><span uk-icon="more"></span></a>
+					<a href="<?php echo $entry['target']; ?>" target=_blank><span uk-icon="link-external"></span></a>
+				</td>
 				<td><?php echo $entry['created'] ?? ''; ?></td>
 				<td><?php echo $entry['amount'] ?? ''; ?></td>
 			</tr>

@@ -41,7 +41,6 @@
 	<thead>
 	<tr>
 		<th role="columnheader">Url</th>
-		<th role="columnheader">Visit</th>
 		<th role="columnheader">Created</th>
 		<th role="columnheader">Details</th>
 	</tr>
@@ -52,8 +51,7 @@
         foreach($TemplateData['searchresults']['results'] as $key=>$entry) {
             ?>
 			<tr>
-				<td><?php echo $entry['url']; ?></td>
-				<td><a href="<?php echo $entry['url']; ?>" target=_blank><span uk-icon="link-external"></span></a></td>
+				<td><?php echo $entry['url']; ?> <a href="<?php echo $entry['url']; ?>" target=_blank><span uk-icon="link-external"></span></a></td>
 				<td><?php echo $entry['created'] ?? ''; ?></td>
 				<td><a href="index.php?p=domain&id=<?php echo $entry['id']; ?>"><span uk-icon="more"></span></a></td>
 			</tr>
