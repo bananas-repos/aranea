@@ -14,40 +14,43 @@
 # along with this program.  If not, see http://www.gnu.org/licenses/gpl-3.0.
 
 package Aranea::Common;
-use 5.20.0;
+use 5.36.0;
 use strict;
 use warnings;
 use utf8;
-use Term::ANSIColor qw(:constants);
+use Term::ANSIColor qw(:constants colorstrip);
 
 use DateTime;
 use Exporter qw(import);
 
 
-our @EXPORT_OK = qw(sayLog sayYellow sayGreen sayRed addToStats);
+our @EXPORT_OK = qw(sayLog sayYellow sayGreen sayRed addToStats queryLog);
 
 sub sayLog {
 	my ($string) = @_;
 	my $dt = DateTime->now;
-	say "[".$dt->datetime."] DEBUG: ".$string;
+	say "[".$dt->datetime."] DEBUG: ".$string if $main::DEBUG>1;
 }
 
 sub sayYellow {
 	my ($string) = @_;
 	my $dt = DateTime->now;
-	say CLEAR,YELLOW, "[".$dt->datetime."] ".$string, RESET;
+	my $s = CLEAR . YELLOW . "[".$dt->datetime."] ".$string . RESET;
+	say $main::DEBUG < 1 ? colorstrip($s) : $s;
 }
 
 sub sayGreen {
 	my ($string) = @_;
 	my $dt = DateTime->now;
-	say CLEAR,GREEN, "[".$dt->datetime."] ".$string, RESET;
+	my $s = CLEAR . GREEN . "[".$dt->datetime."] ".$string . RESET;
+	say $main::DEBUG < 1 ? colorstrip($s) : $s;
 }
 
 sub sayRed {
 	my ($string) = @_;
 	my $dt = DateTime->now;
-	say BOLD, RED, "[".$dt->datetime."] ".$string, RESET;
+	my $s = BOLD . RED . "[".$dt->datetime."] ".$string . RESET;
+	say $main::DEBUG < 1 ? colorstrip($s) : $s;
 }
 
 ## subroutine to add something to the stats table
@@ -68,6 +71,12 @@ sub addToStats {
 	$query->bind_param(3,$onDuplicateValue);
 
 	$query->execute();
+}
+
+sub queryLog {
+	my ($query) = @_;
+	sayLog $query->{Statement};
+	sayLog "$_ $query->{ParamValues}{$_}" for (keys %{$query->{ParamValues}});
 }
 
 1;

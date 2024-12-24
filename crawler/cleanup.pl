@@ -21,7 +21,7 @@
 # This is the last part of the crawler cycle.
 # Use 'aranea-runner' to execute the parts of the crawler in the correct order.
 
-use 5.20.0;
+use 5.36.0;
 use strict;
 use warnings;
 use utf8;
@@ -29,16 +29,19 @@ use Data::Dumper;
 use Term::ANSIColor qw(:constants);
 
 use lib './lib';
-use Aranea::Common qw(sayLog sayYellow sayGreen sayRed addToStats);
+use Aranea::Common qw(sayLog sayYellow sayGreen sayRed addToStats queryLog);
 
-use DBI;
 use ConfigReader::Simple;
-use URI::URL;
+use Cwd;
+use DBI;
 use Data::Validate::URI qw(is_web_uri);
 use Proc::Pidfile;
-use Cwd;
+use URI::URL;
 
-my $DEBUG = 1;
+# 0 = Write everything to log. Without terminal colors
+# 1 = Print terminal output with colors. Nothing to log file.
+# 2 = Print additional debug lines. Nothing to log file.
+our $DEBUG = 2; # this way it can be used in Common.pm
 my $config = ConfigReader::Simple->new("config.txt");
 die "Could not read config! $ConfigReader::Simple::ERROR\n" unless ref $config;
 
@@ -46,7 +49,7 @@ die "Could not read config! $ConfigReader::Simple::ERROR\n" unless ref $config;
 my $currentdir = getcwd;
 my $pid = Proc::Pidfile->new(pidfile => $currentdir."/log/aranea.pid", silent => 1);
 
-if(!$DEBUG) {
+if($DEBUG == 0) {
 	open (my $LOG, '>>', 'log/aranea.log') or die "Could not open file 'log/aranea.log' $!";
 	select $LOG; $| = 1; # https://perl.plover.com/FAQs/Buffering.html
 }
@@ -66,40 +69,40 @@ die "failed to connect to MySQL database:DBI->errstr()" unless($dbh);
 my @invalidFetchUrl = ();
 my $queryStr = "SELECT `id`, `url` FROM `url_to_fetch`
 				WHERE `fetch_failed` = 0 AND `last_fetched` IS NULL";
-sayLog($queryStr) if $DEBUG;
 my $query = $dbh->prepare($queryStr);
 $query->execute();
+queryLog $query;
 while(my @row = $query->fetchrow_array) {
 	my $url = $row[1];
 	if(!is_web_uri($url)) {
 		push(@invalidFetchUrl, $row[0]);
-		sayLog "Not a valid URI $url" if $DEBUG;
+		sayLog "Not a valid URI $url";
 		sayYellow "Not a valid URI $url";
 	}
 }
 
 sayYellow "Invalid url_to_fetch: ".scalar @invalidFetchUrl;
 $queryStr = "DELETE FROM `url_to_fetch` WHERE `id` = ?";
-sayLog($queryStr) if $DEBUG;
 $query = $dbh->prepare($queryStr);
 foreach my $invalidId (@invalidFetchUrl) {
 	$query->execute($invalidId);
-	sayLog "Removed $invalidId from url_to_fetch" if $DEBUG;
+	queryLog $query;
+	sayLog "Removed $invalidId from url_to_fetch";
 }
 sayGreen "Invalid url_to_fetch removed: ".scalar @invalidFetchUrl;
 
 # Update the unique domains
 $queryStr = "INSERT IGNORE INTO `unique_domain` (url) select DISTINCT(baseurl) as url FROM `url_to_fetch`
 				WHERE `fetch_failed` = 0 AND `last_fetched` IS NOT NULL";
-sayLog($queryStr) if $DEBUG;
 $query = $dbh->prepare($queryStr);
 $query->execute();
+queryLog $query;
 
 # Now validate the unique ones
 $queryStr = "SELECT `id`, `url` FROM `unique_domain`";
-sayLog($queryStr) if $DEBUG;
 $query = $dbh->prepare($queryStr);
 $query->execute();
+queryLog $query;
 my @invalidUrls = ();
 my @toBeDeletedFromFetchAgain = ();
 while(my @row = $query->fetchrow_array) {
@@ -123,11 +126,11 @@ while(my @row = $query->fetchrow_array) {
 
 sayYellow "Invalid unique_domain: ".scalar @invalidUrls;
 $queryStr = "DELETE FROM `unique_domain` WHERE `id` = ?";
-sayLog($queryStr) if $DEBUG;
 $query = $dbh->prepare($queryStr);
 foreach my $invalidId (@invalidUrls) {
 	$query->execute($invalidId);
-	sayLog "Removed $invalidId from unique_domain" if $DEBUG;
+	queryLog $query;
+	sayLog "Removed $invalidId from unique_domain";
 }
 sayGreen "Invalid unique_domain removed: ".scalar @invalidUrls;
 
@@ -138,9 +141,9 @@ $queryStr = "SELECT count(baseurl) AS amount, baseurl
 				WHERE `last_fetched` <> 0
 				GROUP BY baseurl
 				HAVING amount > ".$config->get("CLEANUP_URLS_AMOUNT_ABOVE");
-sayLog($queryStr) if $DEBUG;
 $query = $dbh->prepare($queryStr);
 $query->execute();
+queryLog $query;
 while(my @row = $query->fetchrow_array) {
 	my $baseUrl = $row[1];
 	push(@toBeDeletedFromFetchAgain, $baseUrl);
@@ -148,11 +151,11 @@ while(my @row = $query->fetchrow_array) {
 
 sayYellow "Remove baseurls from url_to_fetch: ".scalar @toBeDeletedFromFetchAgain;
 $queryStr = "DELETE FROM url_to_fetch WHERE `baseurl` = ?";
-sayLog($queryStr) if $DEBUG;
 $query = $dbh->prepare($queryStr);
 foreach my $baseUrl (@toBeDeletedFromFetchAgain) {
 	$query->execute($baseUrl);
-	sayLog "Removed $baseUrl from url_to_fetch" if $DEBUG;
+	queryLog $query;
+	sayLog "Removed $baseUrl from url_to_fetch";
 }
 sayGreen "Removed baseurls from url_to_fetch: ".scalar @toBeDeletedFromFetchAgain;
 

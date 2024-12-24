@@ -21,7 +21,7 @@
 # The next step is 'cleanup.pl' to remove invalid, too much, spam entries and some more.
 # Use 'aranea-runner' to execute the parts of the crawler in the correct order.
 
-use 5.20.0;
+use 5.36.0;
 use strict;
 use warnings;
 use utf8;
@@ -29,19 +29,22 @@ use Data::Dumper;
 use Term::ANSIColor qw(:constants);
 
 use lib './lib';
-use Aranea::Common qw(sayLog sayYellow sayGreen sayRed addToStats);
+use Aranea::Common qw(sayLog sayYellow sayGreen sayRed addToStats queryLog);
 
-use open qw( :std :encoding(UTF-8) );
-use DBI;
 use ConfigReader::Simple;
-use HTML::LinkExtor;
-use URI::URL;
-use File::Basename;
-use Digest::MD5 qw(md5_hex);
-use Data::Validate::URI qw(is_web_uri);
-use Proc::Pidfile;
 use Cwd;
+use DBI;
+use Data::Validate::URI qw(is_web_uri);
+use Digest::MD5 qw(md5_hex);
+use File::Basename;
+use HTML::LinkExtor;
+use Proc::Pidfile;
+use URI::URL;
+use open qw( :std :encoding(UTF-8) );
 
+# 0 = Write everything to log. Without terminal colors
+# 1 = Print terminal output with colors. Nothing to log file.
+# 2 = Print additional debug lines. Nothing to log file.
 my $DEBUG = 0;
 my $config = ConfigReader::Simple->new("config.txt");
 die "Could not read config! $ConfigReader::Simple::ERROR\n" unless ref $config;
@@ -50,7 +53,7 @@ die "Could not read config! $ConfigReader::Simple::ERROR\n" unless ref $config;
 my $currentdir = getcwd;
 my $pid = Proc::Pidfile->new(pidfile => $currentdir."/log/aranea.pid", silent => 1);
 
-if(!$DEBUG) {
+if($DEBUG == 0) {
 	open (my $LOG, '>>', 'log/aranea.log') or die "Could not open file 'log/aranea.log' $!";
 	select $LOG; $| = 1; # https://perl.plover.com/FAQs/Buffering.html
 }
@@ -66,7 +69,6 @@ my $dbDsn = "DBI:mysql:database=".$config->get("DB_NAME").";host=".$config->get(
 my $dbh = DBI->connect($dbDsn,$config->get("DB_USER"),$config->get("DB_PASS"), \%dbAttr);
 die "failed to connect to MySQL database:DBI->errstr()" unless($dbh);
 
-
 # Get the fetched files
 my @results = glob("storage/*.result");
 die "Nothing to parse. No files found." unless(@results);
@@ -81,9 +83,9 @@ foreach (@queryIds) {
 # Get the baseurls to create absolute links to insert while parsing the file
 my %baseUrls;
 my $queryStr = "SELECT `id`, `baseurl` FROM `url_to_fetch` WHERE `id` IN (".join(', ', ('?') x @queryIds).")";
-sayLog($queryStr) if $DEBUG;
 my $query = $dbh->prepare($queryStr);
 $query->execute(@queryIds);
+queryLog $query;
 while(my @row = $query->fetchrow_array) {
 	$baseUrls{$row[0]} = $row[1];
 }
@@ -91,9 +93,9 @@ while(my @row = $query->fetchrow_array) {
 # Get the string to ignore
 my @urlStringsToIgnore;
 $queryStr = "SELECT `searchfor` FROM `url_to_ignore`";
-sayLog($queryStr) if $DEBUG;
 $query = $dbh->prepare($queryStr);
 $query->execute();
+queryLog $query;
 while(my @row = $query->fetchrow) {
 	push(@urlStringsToIgnore, $row[0])
 }
@@ -161,7 +163,7 @@ sub cleanLinks {
 
 	sayYellow "Clean found links: ".scalar @linkArray;
 	foreach my $toSearch (@urlsToIgnore) {
-		sayYellow "Clean links from: ".$toSearch if $DEBUG;
+		sayYellow "Clean links from: ".$toSearch;
 		@linkArray = grep {!/$toSearch/i} @linkArray;
 	}
 	sayGreen "Cleaned found links: ".scalar @linkArray;
@@ -181,7 +183,7 @@ sub insertIntoDb {
 					`url` = ?,
 					`baseurl` = ?,
 					`created` = NOW()";
-	sayLog $queryStr if $DEBUG;
+	sayLog $queryStr;
 	$query = $dbh->prepare($queryStr);
 
 	my $queryOriginStr = "INSERT INTO `url_origin` SET
@@ -190,7 +192,7 @@ sub insertIntoDb {
 						`created` = NOW(),
 						`amount` = 1
 						ON DUPLICATE KEY UPDATE `amount` = `amount`+1";
-	sayLog $queryOriginStr if $DEBUG;
+	sayLog $queryOriginStr;
 	my $queryOrigin = $dbh->prepare($queryOriginStr);
 
 	my $md5 = Digest::MD5->new;
@@ -199,7 +201,7 @@ sub insertIntoDb {
 	my $allFailedLinks = 0;
 	foreach my $link (@links) {
 
-		sayLog $link if ($DEBUG);
+		sayLog $link;
 
 		if(!is_web_uri($link)) {
 			sayYellow "Ignore URL it is invalid: $link";
@@ -218,10 +220,12 @@ sub insertIntoDb {
 		my $digest = $md5->hexdigest;
 		my $baseurl = $url->scheme."://".$url->host;
 		$query->execute($digest, $link, $baseurl);
+		queryLog $query;
 		$md5->reset;
 
 		# update relation
 		$queryOrigin->execute($origin, $baseurl) if($origin ne $baseurl);
+		queryLog $queryOrigin;
 
 		$counter++;
 		$allLinks++;

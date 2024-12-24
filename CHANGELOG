@@ -1,3 +1,15 @@
+1.0 - TBD
++ First public stable release
+
+0.5 - TBD
++ First public beta release
+
+0.4
++ Change: Updated requirements. New perl module required since config format changed.
++ Change: New config format. The new file is config.ini. Use new config.default.ini as a base.
++ Better log levels.
++ Better db query logging.
+
 0.3
 + Change: Crawler config change. Please update config first. Compare it with config.default.txt
 + Change: Setup sql file changed. Creation of the database needs to be done beforehand.

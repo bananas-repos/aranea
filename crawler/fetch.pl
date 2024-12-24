@@ -28,16 +28,19 @@ use Data::Dumper;
 use Term::ANSIColor qw(:constants);
 
 use lib './lib';
-use Aranea::Common qw(sayLog sayYellow sayGreen sayRed addToStats);
+use Aranea::Common qw(sayLog sayYellow sayGreen sayRed addToStats queryLog);
 
-use open qw( :std :encoding(UTF-8) );
-use DBI;
 use ConfigReader::Simple;
-use LWP::UserAgent;
-use HTTP::Request;
-use Proc::Pidfile;
 use Cwd;
+use DBI;
+use HTTP::Request;
+use LWP::UserAgent;
+use Proc::Pidfile;
+use open qw( :std :encoding(UTF-8) );
 
+# 0 = Write everything to log. Without terminal colors
+# 1 = Print terminal output with colors. Nothing to log file.
+# 2 = Print additional debug lines. Nothing to log file.
 my $DEBUG = 0;
 my $config = ConfigReader::Simple->new("config.txt");
 die "Could not read config! $ConfigReader::Simple::ERROR\n" unless ref $config;
@@ -47,7 +50,7 @@ my $currentdir = getcwd;
 my $pid = Proc::Pidfile->new(pidfile => $currentdir."/log/aranea.pid", silent => 1);
 
 # write everything into log file
-if(!$DEBUG) {
+if($DEBUG == 0) {
     open (my $LOG, '>>', 'log/aranea.log') or die "Could not open file 'log/aranea.log' $!";
     select $LOG; $| = 1; # https://perl.plover.com/FAQs/Buffering.html
 }
@@ -59,11 +62,9 @@ my %dbAttr = (
     AutoCommit=>0, # manually use transactions
     mysql_enable_utf8mb4 => 1
 );
-# mysql_auto_reconnect
 my $dbDsn = "DBI:mysql:database=".$config->get("DB_NAME").";host=".$config->get("DB_HOST").";port=".$config->get("DB_PORT");
 my $dbh = DBI->connect($dbDsn,$config->get("DB_USER"),$config->get("DB_PASS"), \%dbAttr);
 die "Failed to connect to MySQL database:DBI->errstr()" unless($dbh);
-
 
 # Fetch the urls to fetch from the table
 my %urlsToFetch;
@@ -177,9 +178,10 @@ sub updateFetched {
     sayYellow "Update fetch timestamps: ".scalar @urls;
     $query = $dbh->prepare("UPDATE `url_to_fetch` SET `last_fetched` = NOW() WHERE `id` = ?");
     foreach my $idToUpdate (@urls) {
-        sayLog "Update fetch timestamp for: $idToUpdate" if($DEBUG);
+        sayLog "Update fetch timestamp for: $idToUpdate";
         $query->bind_param(1,$idToUpdate);
         $query->execute();
+        queryLog $query;
     }
     sayGreen "Update fetch timestamps done";
 }
@@ -195,9 +197,10 @@ sub updateFailed {
     sayYellow "Update fetch failed: ".scalar @urls;
     $query = $dbh->prepare("UPDATE `url_to_fetch` SET `fetch_failed` = 1, `last_fetched` = NOW() WHERE `id` = ?");
     foreach my $idToUpdate (@urls) {
-        sayLog "Update fetch failed for: $idToUpdate" if($DEBUG);
+        sayLog "Update fetch failed for: $idToUpdate";
         $query->bind_param(1,$idToUpdate);
         $query->execute();
+        queryLog $query;
     }
     sayGreen "Update fetch failed done";
 }
