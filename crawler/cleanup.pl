@@ -31,7 +31,7 @@ use Term::ANSIColor qw(:constants);
 use lib './lib';
 use Aranea::Common qw(sayLog sayYellow sayGreen sayRed addToStats queryLog);
 
-use ConfigReader::Simple;
+use Config::Tiny;
 use Cwd;
 use DBI;
 use Data::Validate::URI qw(is_web_uri);
@@ -41,9 +41,9 @@ use URI::URL;
 # 0 = Write everything to log. Without terminal colors
 # 1 = Print terminal output with colors. Nothing to log file.
 # 2 = Print additional debug lines. Nothing to log file.
-our $DEBUG = 2; # this way it can be used in Common.pm
-my $config = ConfigReader::Simple->new("config.txt");
-die "Could not read config! $ConfigReader::Simple::ERROR\n" unless ref $config;
+our $DEBUG = 0; # this way it can be used in Common.pm
+my $config = Config::Tiny->read("config.ini", "utf8");
+die "Could not read config! $Config::Tiny::errstr\n" unless ref $config;
 
 # create the PID file and exit silently if it is already running.
 my $currentdir = getcwd;
@@ -64,6 +64,7 @@ my $dbDsn = "DBI:mysql:database=".$config->{db}->{DB_NAME}.";host=".$config->{db
 my $dbh = DBI->connect($dbDsn,$config->{db}->{DB_USER},$config->{db}->{DB_PASS}, \%dbAttr);
 die "Failed to connect to MySQL database:DBI->errstr()" unless($dbh);
 
+sayGreen "Cleanup starting";
 
 # clean up url_to_fetch
 my @invalidFetchUrl = ();

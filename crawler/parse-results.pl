@@ -31,7 +31,7 @@ use Term::ANSIColor qw(:constants);
 use lib './lib';
 use Aranea::Common qw(sayLog sayYellow sayGreen sayRed addToStats queryLog);
 
-use ConfigReader::Simple;
+use Config::Tiny;
 use Cwd;
 use DBI;
 use Data::Validate::URI qw(is_web_uri);
@@ -45,9 +45,9 @@ use open qw( :std :encoding(UTF-8) );
 # 0 = Write everything to log. Without terminal colors
 # 1 = Print terminal output with colors. Nothing to log file.
 # 2 = Print additional debug lines. Nothing to log file.
-my $DEBUG = 0;
-my $config = ConfigReader::Simple->new("config.txt");
-die "Could not read config! $ConfigReader::Simple::ERROR\n" unless ref $config;
+our $DEBUG = 0;
+my $config = Config::Tiny->read("config.ini", "utf8");
+die "Could not read config! $Config::Tiny::errstr\n" unless ref $config;
 
 # create the PID file and exit silently if it is already running.
 my $currentdir = getcwd;
@@ -68,6 +68,8 @@ my %dbAttr = (
 my $dbDsn = "DBI:mysql:database=".$config->{db}->{DB_NAME}.";host=".$config->{db}->{DB_HOST}.";port=".$config->{db}->{DB_PORT};
 my $dbh = DBI->connect($dbDsn,$config->{db}->{DB_USER},$config->{db}->{DB_PASS}, \%dbAttr);
 die "Failed to connect to MySQL database:DBI->errstr()" unless($dbh);
+
+sayGreen "Parse results starting";
 
 # Get the fetched files
 my @results = glob("storage/*.result");
@@ -224,8 +226,10 @@ sub insertIntoDb {
 		$md5->reset;
 
 		# update relation
-		$queryOrigin->execute($origin, $baseurl) if($origin ne $baseurl);
-		queryLog $queryOrigin;
+		if($origin ne $baseurl) {
+			$queryOrigin->execute($origin, $baseurl) if($origin ne $baseurl);
+			queryLog $queryOrigin;
+		}
 
 		$counter++;
 		$allLinks++;
