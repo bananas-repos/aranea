@@ -60,9 +60,9 @@ my %dbAttr = (
     RaiseError=>1, # turn on error reporting via die()
 	mysql_enable_utf8mb4 => 1
 );
-my $dbDsn = "DBI:mysql:database=".$config->get("DB_NAME").";host=".$config->get("DB_HOST").";port=".$config->get("DB_PORT");
-my $dbh = DBI->connect($dbDsn,$config->get("DB_USER"),$config->get("DB_PASS"), \%dbAttr);
-die "failed to connect to MySQL database:DBI->errstr()" unless($dbh);
+my $dbDsn = "DBI:mysql:database=".$config->{db}->{DB_NAME}.";host=".$config->{db}->{DB_HOST}.";port=".$config->{db}->{DB_PORT};
+my $dbh = DBI->connect($dbDsn,$config->{db}->{DB_USER},$config->{db}->{DB_PASS}, \%dbAttr);
+die "Failed to connect to MySQL database:DBI->errstr()" unless($dbh);
 
 
 # clean up url_to_fetch
@@ -140,7 +140,7 @@ $queryStr = "SELECT count(baseurl) AS amount, baseurl
 				FROM `url_to_fetch`
 				WHERE `last_fetched` <> 0
 				GROUP BY baseurl
-				HAVING amount > ".$config->get("CLEANUP_URLS_AMOUNT_ABOVE");
+				HAVING amount > ".$config->{cleanup}->{CLEANUP_URLS_AMOUNT_ABOVE};
 $query = $dbh->prepare($queryStr);
 $query->execute();
 queryLog $query;

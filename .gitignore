@@ -1,6 +1,6 @@
 .idea
 _Deparsed_XSubs.pm
-config.txt
+config.ini
 *.pid
 *.log
 *.run

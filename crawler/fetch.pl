@@ -42,7 +42,7 @@ use open qw( :std :encoding(UTF-8) );
 # 1 = Print terminal output with colors. Nothing to log file.
 # 2 = Print additional debug lines. Nothing to log file.
 my $DEBUG = 0;
-my $config = ConfigReader::Simple->new("config.txt");
+my $config = Config::Tiny->read("../config.ini", "utf8");
 die "Could not read config! $ConfigReader::Simple::ERROR\n" unless ref $config;
 
 # create the PID file and exit silently if it is already running.
@@ -62,8 +62,8 @@ my %dbAttr = (
     AutoCommit=>0, # manually use transactions
     mysql_enable_utf8mb4 => 1
 );
-my $dbDsn = "DBI:mysql:database=".$config->get("DB_NAME").";host=".$config->get("DB_HOST").";port=".$config->get("DB_PORT");
-my $dbh = DBI->connect($dbDsn,$config->get("DB_USER"),$config->get("DB_PASS"), \%dbAttr);
+my $dbDsn = "DBI:mysql:database=".$config->{db}->{DB_NAME}.";host=".$config->{db}->{DB_HOST}.";port=".$config->{db}->{DB_PORT};
+my $dbh = DBI->connect($dbDsn,$config->{db}->{DB_USER},$config->{db}->{DB_PASS}, \%dbAttr);
 die "Failed to connect to MySQL database:DBI->errstr()" unless($dbh);
 
 # Fetch the urls to fetch from the table
@@ -73,7 +73,7 @@ my $query = $dbh->prepare("SELECT `id`, `url`
                             WHERE `last_fetched` < NOW() - INTERVAL 1 MONTH
                                 OR `last_fetched` IS NULL
                                 AND `fetch_failed` = 0
-                            LIMIT ".$config->get("FETCH_URLS_PER_RUN"));
+                            LIMIT ".$config->{fetch}->{FETCH_URLS_PER_RUN});
 $query->execute();
 while(my @row = $query->fetchrow_array) {
     $urlsToFetch{$row[0]} = $row[1];
@@ -85,15 +85,15 @@ my @urlsFailed;
 
 # Config the user agent for the request
 my $request_headers = [
-    'User-Agent' => $config->get("UA_AGENT"),
-    'Accept' => $config->get("UA_ACCEPT"),
-    'Accept-Language' => $config->get("UA_LANG"),
+    'User-Agent' => $config->{http}->{UA_AGENT},
+    'Accept' => $config->{http}->{UA_ACCEPT},
+    'Accept-Language' => $config->{http}->{UA_LANG},
     'Accept-Encoding' => HTTP::Message::decodable,
-    'Cache-Control' => $config->get("UA_CACHE")
+    'Cache-Control' => $config->{http}->{UA_CACHE}
 ];
 my $ua = LWP::UserAgent->new();
-$ua->timeout($config->get("UA_TIMEOUT"));
-$ua->max_size($config->get("FETCH_MAX_BYTES_PER_PAGE"));
+$ua->timeout($config->{fetch}->{UA_TIMEOUT});
+$ua->max_size($config->{fetch}->{FETCH_MAX_BYTES_PER_PAGE});
 
 ## Now loop over them and store the results
 my $counter = 0;
@@ -131,7 +131,7 @@ while ( my ($id, $url) = each %urlsToFetch ) {
         sayRed "Fetching: $id failed: $res->code ".$res->status_line;
     }
 
-    if($counter >= $config->get("FETCH_URLS_PER_PACKAGE")) {
+    if($counter >= $config->{fetch}->{FETCH_URLS_PER_PACKAGE}) {
         updateFetched($dbh, @urlsFetched);
         $dbh->commit();
         updateFailed($dbh, @urlsFailed);
