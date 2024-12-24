@@ -15,6 +15,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see http://www.gnu.org/licenses/gpl-3.0.
 
+# Fetches the urls stored in url_to_fetch and stores the resulting answer into storage folder.
+# Updates entries if no response is returned (404, timeout or error) and when the fetch happened.
+# The next step is 'parse-results.pl' to parse the results from the storage folder.
+# Use 'aranea-runner' to execute the parts of the crawler in the correct order.
+
 use 5.20.0;
 use strict;
 use warnings;

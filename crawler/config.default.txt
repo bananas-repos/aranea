@@ -6,7 +6,7 @@ DB_USER=user
 DB_PASS=test
 
 # Settings for the http call
-UA_AGENT="Mozilla/5.0 (X11; Linux x86_64; rv:131.0) Gecko/20100101 Firefox/131.0"
+UA_AGENT="Mozilla/5.0 (X11; Linux x86_64; rv:133.0) Gecko/20100101 Firefox/133.0"
 UA_ACCEPT="text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
 UA_LANG="en-US"
 UA_CACHE="no-cache"

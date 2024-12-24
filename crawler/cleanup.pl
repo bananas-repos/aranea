@@ -15,6 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see http://www.gnu.org/licenses/gpl-3.0.
 
+# Removes urls if there are too many entries.
+# Create the uniq entries in unique_domain table.
+# Compares entries from unique_domain and url_to_fetch against spam info.
+# This is the last part of the crawler cycle.
+# Use 'aranea-runner' to execute the parts of the crawler in the correct order.
+
 use 5.20.0;
 use strict;
 use warnings;

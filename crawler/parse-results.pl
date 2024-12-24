@@ -15,6 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see http://www.gnu.org/licenses/gpl-3.0.
 
+# Parses every file in the storage folder and extracts the links.
+# Does URI valid check and stores them into the url_to_fetch table.
+# Created and updates the entries in the url_origin table.
+# The next step is 'cleanup.pl' to remove invalid, too much, spam entries and some more.
+# Use 'aranea-runner' to execute the parts of the crawler in the correct order.
+
 use 5.20.0;
 use strict;
 use warnings;
