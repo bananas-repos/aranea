@@ -39,7 +39,7 @@ use open qw( :std :encoding(UTF-8) );
 # 0 = Write everything to log. Without terminal colors
 # 1 = Print terminal output with colors. Nothing to log file.
 # 2 = Print additional debug lines. Nothing to log file.
-our $DEBUG = 2; # this way it can be used in Common.pm
+our $DEBUG = 1; # this way it can be used in Common.pm
 my $config = Config::Tiny->read("../config.ini", "utf8");
 die "Could not read config! $Config::Tiny::errstr\n" unless ref $config;
 
@@ -107,6 +107,7 @@ my $queryStr = "INSERT IGNORE INTO `categorization` SET
 sayLog $queryStr;
 my $query = $dbh->prepare($queryStr);
 my $md5 = Digest::MD5->new;
+my $counter = 0;
 foreach my $resultFile (@results) {
     sayYellow "Parsing file: $resultFile";
     my $category = basename($resultFile,".cat.txt");
@@ -127,10 +128,20 @@ foreach my $resultFile (@results) {
         queryLog $query;
 
         sayYellow "Inserting $parts[1] $category";
+
+        $counter++;
+
+        if($counter >= $config->{fetch}->{COMMIT_PACKAGE_SIZE}) {
+            $counter = 0;
+            $dbh->commit();
+            sleep(rand(7));
+        }
     }
     close(FH);
 }
-$dbh->commit();
+if($counter > 0) {
+    $dbh->commit();
+}
 
 # end
 $dbh->disconnect();
