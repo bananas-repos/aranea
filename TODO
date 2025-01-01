@@ -1,7 +1,5 @@
+Better naming in config since it uses sections now.
 Better naming in webcode...
 Merge 301 redirects? (eg. http to https)
-Set correct timezone. Maybe in config?
 Use system available perl modules to avoid local cpan usage.
-Some sort of matching against spam domain list?
--- https://github.com/StevenBlack/hosts/tree/master
 Documentation for web interface and installation.

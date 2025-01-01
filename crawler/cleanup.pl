@@ -41,8 +41,8 @@ use URI::URL;
 # 0 = Write everything to log. Without terminal colors
 # 1 = Print terminal output with colors. Nothing to log file.
 # 2 = Print additional debug lines. Nothing to log file.
-our $DEBUG = 0; # this way it can be used in Common.pm
-my $config = Config::Tiny->read("config.ini", "utf8");
+our $DEBUG = 1; # this way it can be used in Common.pm
+our $config = Config::Tiny->read("config.ini", "utf8");
 die "Could not read config! $Config::Tiny::errstr\n" unless ref $config;
 
 # create the PID file and exit silently if it is already running.
@@ -68,9 +68,8 @@ sayGreen "Cleanup starting";
 
 # clean up url_to_fetch
 my @invalidFetchUrl = ();
-my $queryStr = "SELECT `id`, `url` FROM `url_to_fetch`
-				WHERE `fetch_failed` = 0 AND `last_fetched` IS NULL";
-my $query = $dbh->prepare($queryStr);
+my $query = $dbh->prepare("SELECT `id`, `url` FROM `url_to_fetch`
+				WHERE `fetch_failed` = 0 AND `last_fetched` IS NULL");
 $query->execute();
 queryLog $query;
 while(my @row = $query->fetchrow_array) {
@@ -83,8 +82,7 @@ while(my @row = $query->fetchrow_array) {
 }
 
 sayYellow "Invalid url_to_fetch: ".scalar @invalidFetchUrl;
-$queryStr = "DELETE FROM `url_to_fetch` WHERE `id` = ?";
-$query = $dbh->prepare($queryStr);
+$query = $dbh->prepare("DELETE FROM `url_to_fetch` WHERE `id` = ?");
 foreach my $invalidId (@invalidFetchUrl) {
 	$query->execute($invalidId);
 	queryLog $query;
@@ -92,57 +90,19 @@ foreach my $invalidId (@invalidFetchUrl) {
 }
 sayGreen "Invalid url_to_fetch removed: ".scalar @invalidFetchUrl;
 
-# Update the unique domains
-$queryStr = "INSERT IGNORE INTO `unique_domain` (url) select DISTINCT(baseurl) as url FROM `url_to_fetch`
-				WHERE `fetch_failed` = 0 AND `last_fetched` IS NOT NULL";
-$query = $dbh->prepare($queryStr);
+sayYellow "Update unique_domain from recently fetched.";
+$query = $dbh->prepare("INSERT IGNORE INTO `unique_domain` (url) select DISTINCT(baseurl) as url FROM `url_to_fetch`
+				WHERE `fetch_failed` = 0 AND `last_fetched` IS NOT NULL");
 $query->execute();
 queryLog $query;
 
-# Now validate the unique ones
-$queryStr = "SELECT `id`, `url` FROM `unique_domain`";
-$query = $dbh->prepare($queryStr);
-$query->execute();
-queryLog $query;
-my @invalidUrls = ();
+sayYellow "Remove urls from fetch since we have enough already.";
 my @toBeDeletedFromFetchAgain = ();
-while(my @row = $query->fetchrow_array) {
-	my $link = $row[1];
-	my $id = $row[0];
-	if(!is_web_uri($link)) {
-		sayYellow "Ignore URL it is invalid: $link";
-		push(@invalidUrls, $id);
-		push(@toBeDeletedFromFetchAgain, $link);
-		next;
-	}
-
-	my $url = url($link);
-	if(!defined($url->scheme) || index($url->scheme,"http") == -1) {
-		sayYellow "Ignore URL because of scheme: $link";
-		push(@invalidUrls, $id);
-		push(@toBeDeletedFromFetchAgain, $link);
-		next;
-	}
-}
-
-sayYellow "Invalid unique_domain: ".scalar @invalidUrls;
-$queryStr = "DELETE FROM `unique_domain` WHERE `id` = ?";
-$query = $dbh->prepare($queryStr);
-foreach my $invalidId (@invalidUrls) {
-	$query->execute($invalidId);
-	queryLog $query;
-	sayLog "Removed $invalidId from unique_domain";
-}
-sayGreen "Invalid unique_domain removed: ".scalar @invalidUrls;
-
-
-# remove urls from fetch since we have enough already
-$queryStr = "SELECT count(baseurl) AS amount, baseurl
+$query = $dbh->prepare("SELECT count(baseurl) AS amount, baseurl
 				FROM `url_to_fetch`
 				WHERE `last_fetched` <> 0
 				GROUP BY baseurl
-				HAVING amount > ".$config->{cleanup}->{CLEANUP_URLS_AMOUNT_ABOVE};
-$query = $dbh->prepare($queryStr);
+				HAVING amount > ".$config->{cleanup}->{CLEANUP_URLS_AMOUNT_ABOVE});
 $query->execute();
 queryLog $query;
 while(my @row = $query->fetchrow_array) {
@@ -151,8 +111,7 @@ while(my @row = $query->fetchrow_array) {
 }
 
 sayYellow "Remove baseurls from url_to_fetch: ".scalar @toBeDeletedFromFetchAgain;
-$queryStr = "DELETE FROM url_to_fetch WHERE `baseurl` = ?";
-$query = $dbh->prepare($queryStr);
+$query = $dbh->prepare("DELETE FROM url_to_fetch WHERE `baseurl` = ?");
 foreach my $baseUrl (@toBeDeletedFromFetchAgain) {
 	$query->execute($baseUrl);
 	queryLog $query;
@@ -160,19 +119,15 @@ foreach my $baseUrl (@toBeDeletedFromFetchAgain) {
 }
 sayGreen "Removed baseurls from url_to_fetch: ".scalar @toBeDeletedFromFetchAgain;
 
-# remove failed fetches
 sayYellow "Remove fetch_failed";
-$queryStr = "DELETE FROM url_to_fetch WHERE fetch_failed = 1";
-$query = $dbh->prepare($queryStr);
+$query = $dbh->prepare("DELETE FROM url_to_fetch WHERE fetch_failed = 1");
 $query->execute();
 sayGreen "Remove fetch_failed done";
 
 sayYellow "Remove invalid urls which the is_web_uri check does let pass";
-$queryStr = "DELETE FROM unique_domain WHERE `url` NOT LIKE '%.%'";
-$query = $dbh->prepare($queryStr);
+$query = $dbh->prepare("DELETE FROM unique_domain WHERE `url` NOT LIKE '%.%'");
 $query->execute();
-$queryStr = "DELETE FROM `url_to_fetch` WHERE `baseurl` LIKE '% %'";
-$query = $dbh->prepare($queryStr);
+$query = $dbh->prepare("DELETE FROM `url_to_fetch` WHERE `baseurl` LIKE '% %'");
 $query->execute();
 sayYellow "Remove invalid urls done";
 

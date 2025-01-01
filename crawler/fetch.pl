@@ -42,7 +42,7 @@ use open qw( :std :encoding(UTF-8) );
 # 1 = Print terminal output with colors. Nothing to log file.
 # 2 = Print additional debug lines. Nothing to log file.
 our $DEBUG = 0;
-my $config = Config::Tiny->read("config.ini", "utf8");
+our $config = Config::Tiny->read("config.ini", "utf8");
 die "Could not read config! $Config::Tiny::errstr\n" unless ref $config;
 
 # create the PID file and exit silently if it is already running.

@@ -29,12 +29,14 @@ our @EXPORT_OK = qw(sayLog sayYellow sayGreen sayRed addToStats queryLog);
 sub sayLog {
 	my ($string) = @_;
 	my $dt = DateTime->now;
+	$dt->set_time_zone($main::config->{main}->{TIMEZONE});
 	say "[".$dt->datetime."] DEBUG: ".$string if $main::DEBUG>1;
 }
 
 sub sayYellow {
 	my ($string) = @_;
 	my $dt = DateTime->now;
+	$dt->set_time_zone($main::config->{main}->{TIMEZONE});
 	my $s = CLEAR . YELLOW . "[".$dt->datetime."] ".$string . RESET;
 	say $main::DEBUG < 1 ? colorstrip($s) : $s;
 }
@@ -42,6 +44,7 @@ sub sayYellow {
 sub sayGreen {
 	my ($string) = @_;
 	my $dt = DateTime->now;
+	$dt->set_time_zone($main::config->{main}->{TIMEZONE});
 	my $s = CLEAR . GREEN . "[".$dt->datetime."] ".$string . RESET;
 	say $main::DEBUG < 1 ? colorstrip($s) : $s;
 }
@@ -49,6 +52,7 @@ sub sayGreen {
 sub sayRed {
 	my ($string) = @_;
 	my $dt = DateTime->now;
+	$dt->set_time_zone($main::config->{main}->{TIMEZONE});
 	my $s = BOLD . RED . "[".$dt->datetime."] ".$string . RESET;
 	say $main::DEBUG < 1 ? colorstrip($s) : $s;
 }

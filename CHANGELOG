@@ -9,6 +9,8 @@
 + Change: New config format. The new file is config.ini. Use new config.default.ini as a base.
 + Better log levels.
 + Better db query logging.
++ Timezone set in config now.
++ Added url categorization. See tools.md in documentation folder for details.
 
 0.3
 + Change: Crawler config change. Please update config first. Compare it with config.default.txt

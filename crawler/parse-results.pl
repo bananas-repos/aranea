@@ -46,7 +46,7 @@ use open qw( :std :encoding(UTF-8) );
 # 1 = Print terminal output with colors. Nothing to log file.
 # 2 = Print additional debug lines. Nothing to log file.
 our $DEBUG = 0;
-my $config = Config::Tiny->read("config.ini", "utf8");
+our $config = Config::Tiny->read("config.ini", "utf8");
 die "Could not read config! $Config::Tiny::errstr\n" unless ref $config;
 
 # create the PID file and exit silently if it is already running.
@@ -94,8 +94,7 @@ while(my @row = $query->fetchrow_array) {
 
 # Get the string to ignore
 my @urlStringsToIgnore;
-$queryStr = "SELECT `searchfor` FROM `url_to_ignore`";
-$query = $dbh->prepare($queryStr);
+$query = $dbh->prepare("SELECT `searchfor` FROM `url_to_ignore`");
 $query->execute();
 queryLog $query;
 while(my @row = $query->fetchrow) {
@@ -180,22 +179,17 @@ sub insertIntoDb {
 	my @links = @{ $links };
 
 	sayYellow "Insert links into DB: ".scalar @links;
-	$queryStr = "INSERT IGNORE INTO `url_to_fetch` SET
+	my $query = $dbh->prepare("INSERT IGNORE INTO `url_to_fetch` SET
 					`id` = ?,
 					`url` = ?,
 					`baseurl` = ?,
-					`created` = NOW()";
-	sayLog $queryStr;
-	$query = $dbh->prepare($queryStr);
-
-	my $queryOriginStr = "INSERT INTO `url_origin` SET
+					`created` = NOW()");
+	my $queryOrigin = $dbh->prepare("INSERT INTO `url_origin` SET
 						`origin` = ?,
 						`target` = ?,
 						`created` = NOW(),
 						`amount` = 1
-						ON DUPLICATE KEY UPDATE `amount` = `amount`+1";
-	sayLog $queryOriginStr;
-	my $queryOrigin = $dbh->prepare($queryOriginStr);
+						ON DUPLICATE KEY UPDATE `amount` = `amount`+1");
 
 	my $md5 = Digest::MD5->new;
 	my $counter = 0;
@@ -212,11 +206,13 @@ sub insertIntoDb {
 		}
 
 		my $url = url($link);
-		if(!defined($url->scheme) || ($url->scheme ne "http" && $url->scheme ne "https")) {
+		if(!defined($url->scheme) || index($url->scheme,"http") == -1) {
 			sayYellow "Ignore URL because of scheme: $link";
 			$allFailedLinks++;
 			next;
 		}
+
+		# categorize
 
 		$md5->add($link);
 		my $digest = $md5->hexdigest;
