@@ -77,6 +77,7 @@ my $query = $dbh->prepare("SELECT `id`, `url`
                                 AND `fetch_failed` = 0
                             LIMIT ".$config->{fetch}->{FETCH_URLS_PER_RUN});
 $query->execute();
+queryLog $query;
 while(my @row = $query->fetchrow_array) {
     $urlsToFetch{$row[0]} = $row[1];
 }

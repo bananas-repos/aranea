@@ -28,6 +28,19 @@ or use `aranea-runner` with a cron. The cron schedule depends on the amount of U
 Higher numbers needs longer run times. So plan the schedule around that by running the perl files
 manually first.
 
+## Categorization
+
+Based on https://github.com/StevenBlack/hosts/tree/master found urls are categorized. Categories are set in the
+config file sections `categorization` and `categorization_urls`. The latter defines which urls belongs to a category.
+
+The `fetchcagegorizaion.pl` does the download, parsing and writing into the db from the urls provided in the
+`categorization_urls` config section.
+
+The `categorizeurls.pl` is a helper script to parse every found domain and tries to match
+them into a category. This can take a while.
+
+Initial categorization is done while parsing, if categorization information is provided.
+
 # Ignores
 
 The table `url_to_ignore` does have a small amount of domains
