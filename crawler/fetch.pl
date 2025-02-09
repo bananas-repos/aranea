@@ -20,7 +20,7 @@
 # The next step is 'parse-results.pl' to parse the results from the storage folder.
 # Use 'aranea-runner' to execute the parts of the crawler in the correct order.
 
-use 5.20.0;
+use 5.36.0;
 use strict;
 use warnings;
 use utf8;
@@ -88,11 +88,12 @@ my @urlsFailed;
 
 # Config the user agent for the request
 my $request_headers = [
-    'User-Agent' => $config->{http}->{UA_AGENT},
-    'Accept' => $config->{http}->{UA_ACCEPT},
+    'User-Agent'      => $config->{http}->{UA_AGENT},
+    'Accept'          => $config->{http}->{UA_ACCEPT},
     'Accept-Language' => $config->{http}->{UA_LANG},
     'Accept-Encoding' => HTTP::Message::decodable,
-    'Cache-Control' => $config->{http}->{UA_CACHE}
+    'Cache-Control'   => $config->{http}->{UA_CACHE},
+    'X-Application'   => 'crawler aranea'
 ];
 my $ua = LWP::UserAgent->new();
 $ua->timeout($config->{fetch}->{UA_TIMEOUT});

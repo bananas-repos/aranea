@@ -10,16 +10,35 @@ The aim is to gather unique domains to show what is out there.
 It starts with a given set of URL(s) and parses them for more
 URLs. Stores them and fetches them too. Execute: `perl fetch.pl`
 
+Conditions are: 
+
+```
+WHERE `last_fetched` < NOW() - INTERVAL 1 MONTH 
+OR `last_fetched` IS NULL 
+AND `fetch_failed` = 0
+LIMIT ".$config->{fetch}->{FETCH_URLS_PER_RUN});
+```
+
+Uses the `[http]` settings from `config.ini` for the http call. Limits are set in the `[fetch]` category.
+
+Change `FETCH_URLS_PER_RUN` depending on your available resources.
+
+Successful results are stored in the `storage` folder to be used for the parse command.
+
 ## Parse
 
-Each URL result (Stored result from the call) will be parsed
-for other URLs to follow. `perl parse-results.pl`
+Each URL result (Stored result from `fetch.pl` process) will be parsed
+for new URLs to follow. Execute: `perl parse-results.pl`
+
+It uses the `[parse]` settings from `config.ini`. Adjust the `PARSE_URLS_PER_PACKAGE` setting to match your
+available resources. 
 
 ## Cleanup
 
-After a run cleanup will gather all the unique Domains into
-a table. Removes URLs from the fetch table which are already
-enough. `perl cleanup.pl`
+After a run cleanup will gather all the unique Domains into `unique_domain` table. 
+Removes URLs from the fetch table which are already enough. Execute: `perl cleanup.pl`
+
+It uses the `[cleanup]` settings from `config.ini`.
 
 # Usage
 
@@ -27,6 +46,9 @@ Either run `fetch.pl`, `parse-results.pl` and `cleanup.pl` in the given order ma
 or use `aranea-runner` with a cron. The cron schedule depends on the amount of URLs to be fetched and parsed.
 Higher numbers needs longer run times. So plan the schedule around that by running the perl files
 manually first.
+
+Each process updates `log/last.run` which is used by `aranea-runner` to tell what has been run and what comes next
+to avoid conflicting processes.
 
 ## Categorization
 
