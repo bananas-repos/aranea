@@ -1,3 +1,7 @@
+Next steps:
+Ignore display and management.
+Ability to add new ignores from domain/url and/or directly from overview.
+
 Better naming in config since it uses sections now.
 Better naming in webcode...
 Merge 301 redirects? (eg. http to https)

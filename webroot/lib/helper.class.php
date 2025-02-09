@@ -234,11 +234,11 @@ class Helper {
      * @param string $endChar
      * @return string
      */
-    static function limitWithDots(string $string, int $length, string $endChar): string {
+    static function limitWithDots(string $string, int $length=50, string $endChar="&hellip;"): string {
         $ret = $string;
 
         if(strlen($string.$endChar) > $length) {
-            $ret = substr($string,0, $length).$endChar;
+            $ret = mb_substr($string,0, $length).$endChar;
         }
 
         return $ret;

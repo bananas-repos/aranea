@@ -15,26 +15,6 @@
  *
  * 2022 - 2025 https://www.bananas-playground.net/projekt/aranea
  */
-
-# set to true if you need debug messages in error log file
-const DEBUG = true;
-# set to ture if you need query log messages in error log file.
-const QUERY_DEBUG = true;
-
-# timezone settings
-const TIMEZONE = 'Europe/Berlin';
-
-# path settings
-const PATH_ABSOLUTE = '/path/to/aranea/webroot';
-const PATH_LOG = PATH_ABSOLUTE.'/log';
-const LOGFILE = PATH_LOG.'/aranea.log';
-
-# db settings
-const DB_HOST = 'localhost';
-const DB_USERNAME = 'user';
-const DB_PASSWORD = 'test';
-const DB_NAME = 'aranea';
-
-
-# how may results per page for pagination
-const RESULTS_PER_PAGE = 50;
+?>
+<h1>Ignore settings</h1>
+<p>If a newly found URLs matches any of the ignore string, it will be ignored and removed.</p>

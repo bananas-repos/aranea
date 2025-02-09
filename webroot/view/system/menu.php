@@ -30,6 +30,9 @@
                     <li class="<?php if($_requestMode == "urls") echo 'uk-active'; ?>">
                         <a href="index.php?p=urls">URLs</a>
                     </li>
+	                <li class="<?php if($_requestMode == "ignore") echo 'uk-active'; ?>">
+		                <a href="index.php?p=ignore">Ignore</a>
+	                </li>
                     <li class="<?php if($_requestMode == "stats") echo 'uk-active'; ?>">
                         <a href="index.php?p=stats">Stats</a>
                     </li>

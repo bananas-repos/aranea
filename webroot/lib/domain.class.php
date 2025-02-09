@@ -13,7 +13,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see http://www.gnu.org/licenses/gpl-3.0.
  *
- * 2022 - 2024 https://www.bananas-playground.net/projekt/aranea
+ * 2022 - 2025 https://www.bananas-playground.net/projekt/aranea
  */
 
 /**

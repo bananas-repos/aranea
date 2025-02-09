@@ -13,7 +13,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see http://www.gnu.org/licenses/gpl-3.0.
  *
- * 2022 - 2024 https://www.bananas-playground.net/projekt/aranea
+ * 2022 - 2025 https://www.bananas-playground.net/projekt/aranea
  */
 ?>
 <h1>URLs</h1>
@@ -54,7 +54,7 @@
         foreach($TemplateData['searchresults']['results'] as $key=>$entry) {
             ?>
 			<tr>
-				<td><?php echo $entry['url']; ?> <a href="<?php echo $entry['url']; ?>" target=_blank><span uk-icon="link-external"></span></a></td>
+				<td><?php echo Helper::limitWithDots($entry['url']); ?> <a href="<?php echo $entry['url']; ?>" target=_blank><span uk-icon="link-external"></span></a></td>
 				<td><?php echo $entry['baseurl']; ?></td>
 				<td><?php echo $entry['last_fetched']; ?></td>
 				<td><?php echo $entry['fetch_failed']; ?></td>

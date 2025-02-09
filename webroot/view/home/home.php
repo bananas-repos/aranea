@@ -13,7 +13,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see http://www.gnu.org/licenses/gpl-3.0.
  *
- * 2022 - 2024 https://www.bananas-playground.net/projekt/aranea
+ * 2022 - 2025 https://www.bananas-playground.net/projekt/aranea
  */
  ?>
 <h1>Home</h1>
@@ -33,7 +33,7 @@
                 foreach($TemplateData['latestDomains'] as $k=>$value) {
                     ?>
                     <tr>
-                        <td><?php echo $value['url']; ?></a></td>
+                        <td><a href="index.php?p=url&id=<?php echo $value['id']; ?>"><?php echo $value['url']; ?></a></td>
                     </tr>
                     <?php
                 }
@@ -41,6 +41,7 @@
             ?>
             </tbody>
         </table>
+		<small>Links to detail page.</small>
     </div>
     <div class="uk-overflow-auto">
         <h3>Latest URLs</h3>
@@ -56,7 +57,7 @@
                 foreach($TemplateData['latestUrls'] as $k=>$value) {
                     ?>
                     <tr>
-                        <td><?php echo $value['url']; ?></a></td>
+                        <td><a href="index.php?p=url&id=<?php echo $value['id']; ?>"><?php echo Helper::limitWithDots($value['url']); ?></a></td>
                     </tr>
                     <?php
                 }
@@ -64,9 +65,10 @@
             ?>
             </tbody>
         </table>
+	    <small>URLs truncated for readability. Links to detail page.</small>
     </div>
 	<div class="uk-overflow-auto">
-		<h3>Info</h3>
+		<h3>Last run info</h3>
 		<table class="uk-table uk-table-striped">
 			<thead>
 			<tr>
@@ -80,8 +82,8 @@
                 foreach($TemplateData['stats'] as $k=>$value) {
                     ?>
 					<tr>
-						<td><?php echo $value['action']; ?></a></td>
-						<td><?php echo $value['value']; ?></a></td>
+						<td><?php echo $value['action']; ?></td>
+						<td><?php echo $value['value']; ?></td>
 					</tr>
                     <?php
                 }

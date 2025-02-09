@@ -55,7 +55,7 @@ class Urls extends Base {
     public function latest(): array {
         $ret = array();
 
-        $queryStr = "SELECT id,url,baseurl,created,fetch_failed, last_fetched
+        $queryStr = "SELECT id, url, baseurl, created, fetch_failed, last_fetched
                     FROM `url_to_fetch`
                     ORDER BY created DESC
                     LIMIT 10";

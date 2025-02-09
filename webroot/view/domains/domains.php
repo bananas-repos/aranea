@@ -51,7 +51,7 @@
         foreach($TemplateData['searchresults']['results'] as $key=>$entry) {
             ?>
 			<tr>
-				<td><?php echo $entry['url']; ?> <a href="<?php echo $entry['url']; ?>" target=_blank><span uk-icon="link-external"></span></a></td>
+				<td><?php echo Helper::limitWithDots($entry['url']); ?> <a href="<?php echo $entry['url']; ?>" target=_blank><span uk-icon="link-external"></span></a></td>
 				<td><?php echo $entry['created'] ?? ''; ?></td>
 				<td><a href="index.php?p=domain&id=<?php echo $entry['id']; ?>"><span uk-icon="more"></span></a></td>
 			</tr>
