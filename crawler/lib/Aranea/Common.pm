@@ -1,4 +1,4 @@
-# 2022 - 2024 https://://www.bananas-playground.net/projekt/aranea
+# 2022 - 2025 https://://www.bananas-playground.net/projekt/aranea
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
